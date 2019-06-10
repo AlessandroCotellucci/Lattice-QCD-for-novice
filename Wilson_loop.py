@@ -24,6 +24,9 @@ def randommatrixSU3(M):
                 M[s,j,i]=random.uniform(-1,1)
         for j in range(0,3):
             for i in range(0,3):
+                M[j,i]=M[i,j]
+        for j in range(0,3):
+            for i in range(0,3):
                 M[s,j,i]=complex(identity[j,i],eps*M[s,j,i])
         normalizconst=0.
         #Unitarizing
