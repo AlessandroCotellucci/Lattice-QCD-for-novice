@@ -36,7 +36,8 @@ def randommatrixSU3(M):
         normalizconst=sqrt(normalizconst)
         for j in range(0,3):
             M[s,0,j]=M[s,0,j]/normalizconst
-        M[s,1,0]=conjugate((-M[s,1,1]*conjugate(M[s,0,1])-conjugate(M[s,0,2])*M[s,1,2])/M[s,0,0])
+
+        M[s,1,0]=(-conjugate(M[s,1,1])*M[s,0,1]-M[s,0,2]*conjugate(M[s,1,2]))/conjugate(M[s,0,0])
         normalizconst=0.
         for j in range(0,3):
             normalizconst=normalizconst+M[s,1,j]*conjugate(M[s,1,j])
@@ -46,6 +47,20 @@ def randommatrixSU3(M):
         M[s,2,0]=conjugate(M[s,0,1])*conjugate(M[s,1,2])-conjugate(M[s,0,2])*conjugate(M[s,1,1])
         M[s,2,1]=conjugate(M[s,1,0])*conjugate(M[s,0,2])-conjugate(M[s,0,0])*conjugate(M[s,1,2])
         M[s,2,2]=conjugate(M[s,0,0])*conjugate(M[s,1,1])-conjugate(M[s,1,0])*conjugate(M[s,0,1])
+        normalizconst=0.
+        #Unitarizing
+        for j in range(0,3):
+            normalizconst=normalizconst+M[s,2,j]*conjugate(M[s,2,j])
+        normalizconst=sqrt(normalizconst)
+        for j in range(0,3):
+            M[s,2,j]=M[s,2,j]/normalizconst
+        #print(conjugate(M[s,1,0])*M[s,1,0]+M[s,1,1]*conjugate(M[s,1,1])+M[s,1,2]*conjugate(M[s,1,2]))
+        #print(conjugate(M[s,0,0])*M[s,0,0]+conjugate(M[s,0,1])*M[s,0,1]+conjugate(M[s,0,2])*M[s,0,2])
+        #print(conjugate(M[s,1,0])*M[s,2,0]+M[s,2,1]*conjugate(M[s,1,1])+M[s,2,2]*conjugate(M[s,1,2]))
+        #print(conjugate(M[s,0,0])*M[s,2,0]+conjugate(M[s,0,1])*M[s,2,1]+conjugate(M[s,0,2])*M[s,2,2])
+        #print(conjugate(M[s,1,0])*M[s,0,0]+M[s,0,1]*conjugate(M[s,1,1])+M[s,0,2]*conjugate(M[s,1,2]))
+        #print(conjugate(M[s,2,0])*M[s,2,0]+conjugate(M[s,2,1])*M[s,2,1]+conjugate(M[s,2,2])*M[s,2,2])
+        #print('determinante',linalg.det(M[s]))
         M[s+Nmatrix]=dagger(M[s])
     return M
 
@@ -60,7 +75,7 @@ def dagger(M):
 
 #Function that compute the product of two square matrix with equal dimension
 def rXc(M,H):
-    N=len(M)
+    N=3
     R=zeros((N,N),dtype=complex)
     for j in range(0,N):
         for i in range(0,N):
@@ -105,9 +120,9 @@ def update(U,M):
 
                         s=random.randint(0,2*Nmatrix) #Choose a random matrix
                         y=x
-                        #print(linalg.det( U[x[0],x[1],x[2],x[3],mi]))
                         gamma=Gamma(U,mi,y[0],y[1],y[2],y[3]) #compute Gamma
                         U[x[0],x[1],x[2],x[3],mi] = rXc(M[s],U[x[0],x[1],x[2],x[3],mi]) # update U
+                        print(linalg.det( U[x[0],x[1],x[2],x[3],mi]))
                         dS = -beta/(3)*real(trace(rXc((U[x[0],x[1],x[2],x[3],mi]-old_U),gamma))) # change in action
                         if dS>0and exp(-dS)<random.uniform(0,1):
                             U[x[0],x[1],x[2],x[3],mi] = old_U # restore old value
