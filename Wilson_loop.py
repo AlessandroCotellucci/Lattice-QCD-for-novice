@@ -17,7 +17,7 @@ def trace(M):
 def randommatrixSU3(M):
     identity=eye(3)
     Nmatrix=100
-    M=zeros((2*Nmatrix,3,3),dtype=complex)
+    M=zeros((200,3,3),dtype=complex)
     eps=0.24
     for s in range(0,Nmatrix):
         for j in range(0,3):
@@ -47,13 +47,14 @@ def randommatrixSU3(M):
         M[s,2,0]=conjugate(M[s,0,1])*conjugate(M[s,1,2])-conjugate(M[s,0,2])*conjugate(M[s,1,1])
         M[s,2,1]=conjugate(M[s,1,0])*conjugate(M[s,0,2])-conjugate(M[s,0,0])*conjugate(M[s,1,2])
         M[s,2,2]=conjugate(M[s,0,0])*conjugate(M[s,1,1])-conjugate(M[s,1,0])*conjugate(M[s,0,1])
+        M[s,2,0]=1./(M[s,0,1]*M[s,1,2]-M[s,1,1]*M[s,0,2])*(1-M[s,0,0]*M[s,1,1]*M[s,2,2]-M[s,0,2]*M[s,1,0]*M[s,2,1]+M[s,2,1]*M[s,1,2]*M[s,0,0]+M[s,2,2]*M[s,1,0]*M[s,0,1])
         normalizconst=0.
         #Unitarizing
-        for j in range(0,3):
-            normalizconst=normalizconst+M[s,2,j]*conjugate(M[s,2,j])
-        normalizconst=sqrt(normalizconst)
-        for j in range(0,3):
-            M[s,2,j]=M[s,2,j]/normalizconst
+        #for j in range(0,3):
+        #    normalizconst=normalizconst+M[s,2,j]*conjugate(M[s,2,j])
+        #normalizconst=sqrt(normalizconst)
+        #for j in range(0,3):
+        #    M[s,2,j]=M[s,2,j]/normalizconst
         #print(conjugate(M[s,1,0])*M[s,1,0]+M[s,1,1]*conjugate(M[s,1,1])+M[s,1,2]*conjugate(M[s,1,2]))
         #print(conjugate(M[s,0,0])*M[s,0,0]+conjugate(M[s,0,1])*M[s,0,1]+conjugate(M[s,0,2])*M[s,0,2])
         #print(conjugate(M[s,1,0])*M[s,2,0]+M[s,2,1]*conjugate(M[s,1,1])+M[s,2,2]*conjugate(M[s,1,2]))
@@ -109,6 +110,7 @@ def update(U,M):
     x=[0,0,0,0]
     y=[0,0,0,0]
     beta=5.5
+
     for x[0] in range(0,N):
         for x[1] in range(0,N):
             for x[2] in range(0,N):
@@ -117,12 +119,14 @@ def update(U,M):
                         for n in range(0,3):
                             for i in range(0,3):
                                 old_U[i,n] = U[x[0],x[1],x[2],x[3],mi,i,n] # save original value
-
-                        s=random.randint(0,2*Nmatrix) #Choose a random matrix
+                        s=random.randint(4,2*Nmatrix-2) #Choose a random matrix
                         y=x
                         gamma=Gamma(U,mi,y[0],y[1],y[2],y[3]) #compute Gamma
-                        U[x[0],x[1],x[2],x[3],mi] = rXc(M[s],U[x[0],x[1],x[2],x[3],mi]) # update U
-                        print(linalg.det( U[x[0],x[1],x[2],x[3],mi]))
+                        U[x[0],x[1],x[2],x[3],mi] = dot(M[s],U[x[0],x[1],x[2],x[3],mi]) # update U
+                        deter=linalg.det(U[x[0],x[1],x[2],x[3],mi])
+                        err=abs(1.-deter)
+                        if err>0.01:
+                            print(deter,linalg.det(M[s]),linalg.det(old_U),s)
                         dS = -beta/(3)*real(trace(rXc((U[x[0],x[1],x[2],x[3],mi]-old_U),gamma))) # change in action
                         if dS>0and exp(-dS)<random.uniform(0,1):
                             U[x[0],x[1],x[2],x[3],mi] = old_U # restore old value
@@ -249,12 +253,12 @@ def compute_WL(U,i,j,k,l):
 #allocation of the arrays and definition of the parameters
 a=0.25
 N=4
-Nmatrix=100
+Nmatrix=200
 N_cf=10
 N_cor=20
 U=zeros((N,N,N,N,4,3,3),dtype=complex) # inizializing U
 WL=ones((N_cf), 'double')
-M=zeros((2*Nmatrix,3,3),'double') #inizializing the random matrix
+M=zeros((Nmatrix,3,3),dtype=complex) #inizializing the random matrix
 x=[0,0,0,0]
 # inizializing U with the identity which belongs to the SU(3) group
 for x[0] in range(0,N):
