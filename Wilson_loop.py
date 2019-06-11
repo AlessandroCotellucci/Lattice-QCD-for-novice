@@ -2,6 +2,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 import vegas
 import math
+import cmath
 import random
 from numpy import *
 #Function that compute the trace of a matrix
@@ -21,13 +22,13 @@ def randommatrixSU3(M):
     for s in range(0,Nmatrix):
         for j in range(0,3):
             for i in range(0,3):
-                M[s,j,i]=random.uniform(-1,1)
+                M[s,j,i]=complex(random.uniform(-1,1),random.uniform(-1,1))
         for j in range(0,3):
             for i in range(0,3):
-                M[j,i]=M[i,j]
+                M[j,i]=conjugate(M[i,j])
         for j in range(0,3):
             for i in range(0,3):
-                M[s,j,i]=complex(identity[j,i],eps*M[s,j,i])
+                M[s,j,i]=identity[j,i]+cmath.sqrt(-1)*eps*M[s,j,i]
         normalizconst=0.
         #Unitarizing
         for j in range(0,3):
@@ -104,12 +105,13 @@ def update(U,M):
 
                         s=random.randint(0,2*Nmatrix) #Choose a random matrix
                         y=x
-
+                        #print(linalg.det( U[x[0],x[1],x[2],x[3],mi]))
                         gamma=Gamma(U,mi,y[0],y[1],y[2],y[3]) #compute Gamma
                         U[x[0],x[1],x[2],x[3],mi] = rXc(M[s],U[x[0],x[1],x[2],x[3],mi]) # update U
                         dS = -beta/(3)*real(trace(rXc((U[x[0],x[1],x[2],x[3],mi]-old_U),gamma))) # change in action
                         if dS>0and exp(-dS)<random.uniform(0,1):
                             U[x[0],x[1],x[2],x[3],mi] = old_U # restore old value
+
 
 #Function that compute gamma for QCD using the easiest action
 #input:-i,j,k,l: position in which gamma is computed
@@ -171,8 +173,12 @@ def Gamma(U,mi,i,j,k,l):
             y[2]=k
             y[3]=l
             xpmimni[ni]=(y[ni]-1)%N
-            Gamma=Gamma+rXc(rXc(U[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni],dagger(U[xpni[0],xpni[1],xpni[2],xpni[3],mi])),dagger(U[xpni[0],xpni[1],xpni[2],xpni[3],ni]))
-            Gamma=Gamma+rXc(rXc(dagger(U[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni]),dagger(U[xmni[0],xmni[1],xmni[2],xmni[3],mi])),U[xmni[0],xmni[1],xmni[2],xmni[3],ni])
+            y[0]=i
+            y[1]=j
+            y[2]=k
+            y[3]=l
+            Gamma=Gamma+rXc(rXc(U[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni],dagger(U[xpmipni[0],xpmipni[1],xpmipni[2],xpmipni[3],mi])),dagger(U[y[0],y[1],y[2],y[3],ni]))
+            Gamma=Gamma+rXc(rXc(dagger(U[xpmimni[0],xpmimni[1],xpmimni[2],xpmimni[3],ni]),dagger(U[xmni[0],xmni[1],xmni[2],xmni[3],mi])),U[xmni[0],xmni[1],xmni[2],xmni[3],ni])
     return Gamma
 
 #Function that compute the Wilson Loop for each point of the lattice using the link variables
@@ -221,19 +227,19 @@ def compute_WL(U,i,j,k,l):
                 y[1]=j
                 y[2]=k
                 y[3]=l
-                WL=WL+trace(rXc(U[y[0],y[1],y[2],y[3],mi],rXc(rXc(U[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni],dagger(U[xpmipni[0],xpmipni[1],xpmipni[2],xpmipni[3],mi])),dagger(U[xpni[0],xpni[1],xpni[2],xpni[3],ni]))))
+                WL=WL+trace(rXc(U[y[0],y[1],y[2],y[3],mi],rXc(rXc(U[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni],dagger(U[xpmipni[0],xpmipni[1],xpmipni[2],xpmipni[3],mi])),dagger(U[y[0],y[1],y[2],y[3],ni]))))
 
     return real(WL)/(3.*12)
 
 #allocation of the arrays and definition of the parameters
 a=0.25
 N=4
-Nmatrix=200
+Nmatrix=100
 N_cf=10
 N_cor=20
 U=zeros((N,N,N,N,4,3,3),dtype=complex) # inizializing U
 WL=ones((N_cf), 'double')
-M=zeros((Nmatrix,3,3),'double') #inizializing the random matrix
+M=zeros((2*Nmatrix,3,3),'double') #inizializing the random matrix
 x=[0,0,0,0]
 # inizializing U with the identity which belongs to the SU(3) group
 for x[0] in range(0,N):
