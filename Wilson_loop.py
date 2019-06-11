@@ -108,10 +108,8 @@ def update(U,M):
                         gamma=Gamma(U,mi,y[0],y[1],y[2],y[3]) #compute Gamma
                         U[x[0],x[1],x[2],x[3],mi] = rXc(M[s],U[x[0],x[1],x[2],x[3],mi]) # update U
                         dS = -beta/(3)*real(trace(rXc((U[x[0],x[1],x[2],x[3],mi]-old_U),gamma))) # change in action
-                        print(dS,trace(gamma))
                         if dS>0and exp(-dS)<random.uniform(0,1):
                             U[x[0],x[1],x[2],x[3],mi] = old_U # restore old value
-                    print('Next site')
 
 #Function that compute gamma for QCD using the easiest action
 #input:-i,j,k,l: position in which gamma is computed
