@@ -16,7 +16,7 @@ def trace(M):
 def randommatrixSU3(M):
     identity=eye(3)
     Nmatrix=100
-    M=zeros((Nmatrix,3,3),dtype=complex)
+    M=zeros((2*Nmatrix,3,3),dtype=complex)
     eps=0.24
     for s in range(0,Nmatrix):
         for j in range(0,3):
@@ -45,6 +45,7 @@ def randommatrixSU3(M):
         M[s,2,0]=conjugate(M[s,0,1])*conjugate(M[s,1,2])-conjugate(M[s,0,2])*conjugate(M[s,1,1])
         M[s,2,1]=conjugate(M[s,1,0])*conjugate(M[s,0,2])-conjugate(M[s,0,0])*conjugate(M[s,1,2])
         M[s,2,2]=conjugate(M[s,0,0])*conjugate(M[s,1,1])-conjugate(M[s,1,0])*conjugate(M[s,0,1])
+        M[s+Nmatrix]=dagger(M[s])
     return M
 
 #Function that compute the dagger of a matrix
@@ -101,21 +102,22 @@ def update(U,M):
                             for i in range(0,3):
                                 old_U[i,n] = U[x[0],x[1],x[2],x[3],mi,i,n] # save original value
 
-                        s=random.randint(0,Nmatrix) #Choose a random matrix
+                        s=random.randint(0,2*Nmatrix) #Choose a random matrix
                         y=x
+
                         gamma=Gamma(U,mi,y[0],y[1],y[2],y[3]) #compute Gamma
                         U[x[0],x[1],x[2],x[3],mi] = rXc(M[s],U[x[0],x[1],x[2],x[3],mi]) # update U
                         dS = -beta/(3)*real(trace(rXc((U[x[0],x[1],x[2],x[3],mi]-old_U),gamma))) # change in action
+                        print(dS,trace(gamma))
                         if dS>0and exp(-dS)<random.uniform(0,1):
                             U[x[0],x[1],x[2],x[3],mi] = old_U # restore old value
-
-
+                    print('Next site')
 
 #Function that compute gamma for QCD using the easiest action
 #input:-i,j,k,l: position in which gamma is computed
-#      -R:array of link variables
+#      -U:array of link variables
 #inner parameter:-N:total number of points in the lattice
-def Gamma(R,mi,i,j,k,l):
+def Gamma(U,mi,i,j,k,l):
     N=4
     Gamma=zeros((3,3),dtype=complex)
     xpni=[0,0,0,0]
@@ -141,15 +143,38 @@ def Gamma(R,mi,i,j,k,l):
 
         if ni!=mi :
             xpni[ni]=(y[ni]+1)%N # next site on ni
+            y[0]=i
+            y[1]=j
+            y[2]=k
+            y[3]=l
             xpmi[mi]=(y[mi]+1)%N # next site on mi
+            y[0]=i
+            y[1]=j
+            y[2]=k
+            y[3]=l
             xpmipni[mi]=(y[mi]+1)%N # next site on ni and mi
+            y[0]=i
+            y[1]=j
+            y[2]=k
+            y[3]=l
             xpmipni[ni]=(y[ni]+1)%N
+            y[0]=i
+            y[1]=j
+            y[2]=k
+            y[3]=l
             xmni[ni]=(y[ni]-1)%N # previous site on ni
+            y[0]=i
+            y[1]=j
+            y[2]=k
+            y[3]=l
             xpmimni[mi]=(y[mi]+1)%N # next site on mi and previous on ni
+            y[0]=i
+            y[1]=j
+            y[2]=k
+            y[3]=l
             xpmimni[ni]=(y[ni]-1)%N
-            Gamma=Gamma+rXc(rXc(R[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni],dagger(R[xpmipni[0],xpmipni[1],xpmipni[2],xpmipni[3],mi])),dagger(R[xpni[0],xpni[1],xpni[2],xpni[3],ni]))
-            Gamma=Gamma+rXc(rXc(dagger(R[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni]),dagger(R[xpmimni[0],xpmimni[1],xpmimni[2],xpmimni[3],mi])),R[xmni[0],xmni[1],xmni[2],xmni[3],ni])
-
+            Gamma=Gamma+rXc(rXc(U[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni],dagger(U[xpni[0],xpni[1],xpni[2],xpni[3],mi])),dagger(U[xpni[0],xpni[1],xpni[2],xpni[3],ni]))
+            Gamma=Gamma+rXc(rXc(dagger(U[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni]),dagger(U[xmni[0],xmni[1],xmni[2],xmni[3],mi])),U[xmni[0],xmni[1],xmni[2],xmni[3],ni])
     return Gamma
 
 #Function that compute the Wilson Loop for each point of the lattice using the link variables
@@ -174,14 +199,30 @@ def compute_WL(U,i,j,k,l):
             y[1]=j
             y[2]=k
             y[3]=l
-            xpni=x
-            xpmi=x
-            xpmipni=x
+            xpni=y
+            xpmi=y
+            xpmipni=y
             if ni!=mi :
                 xpni[ni]=(y[ni]+1)%N # next site on ni
+                y[0]=i
+                y[1]=j
+                y[2]=k
+                y[3]=l
                 xpmi[mi]=(y[mi]+1)%N # next site on mi
+                y[0]=i
+                y[1]=j
+                y[2]=k
+                y[3]=l
                 xpmipni[mi]=(y[mi]+1)%N # next site on ni and mi
+                y[0]=i
+                y[1]=j
+                y[2]=k
+                y[3]=l
                 xpmipni[ni]=(y[ni]+1)%N
+                y[0]=i
+                y[1]=j
+                y[2]=k
+                y[3]=l
                 WL=WL+trace(rXc(U[y[0],y[1],y[2],y[3],mi],rXc(rXc(U[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni],dagger(U[xpmipni[0],xpmipni[1],xpmipni[2],xpmipni[3],mi])),dagger(U[xpni[0],xpni[1],xpni[2],xpni[3],ni]))))
 
     return real(WL)/(3.*12)
@@ -189,7 +230,7 @@ def compute_WL(U,i,j,k,l):
 #allocation of the arrays and definition of the parameters
 a=0.25
 N=4
-Nmatrix=100
+Nmatrix=200
 N_cf=10
 N_cor=20
 U=zeros((N,N,N,N,4,3,3),dtype=complex) # inizializing U
