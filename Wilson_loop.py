@@ -47,8 +47,8 @@ def randommatrixSU3(M):
         M[s,2,0]=conjugate(M[s,0,1])*conjugate(M[s,1,2])-conjugate(M[s,0,2])*conjugate(M[s,1,1])
         M[s,2,1]=conjugate(M[s,1,0])*conjugate(M[s,0,2])-conjugate(M[s,0,0])*conjugate(M[s,1,2])
         M[s,2,2]=conjugate(M[s,0,0])*conjugate(M[s,1,1])-conjugate(M[s,1,0])*conjugate(M[s,0,1])
-        M[s,2,0]=1./(M[s,0,1]*M[s,1,2]-M[s,1,1]*M[s,0,2])*(1-M[s,0,0]*M[s,1,1]*M[s,2,2]-M[s,0,2]*M[s,1,0]*M[s,2,1]+M[s,2,1]*M[s,1,2]*M[s,0,0]+M[s,2,2]*M[s,1,0]*M[s,0,1])
-        normalizconst=0.
+        #M[s,2,0]=1./(M[s,0,1]*M[s,1,2]-M[s,1,1]*M[s,0,2])*(1-M[s,0,0]*M[s,1,1]*M[s,2,2]-M[s,0,2]*M[s,1,0]*M[s,2,1]+M[s,2,1]*M[s,1,2]*M[s,0,0]+M[s,2,2]*M[s,1,0]*M[s,0,1])
+        #normalizconst=0.
         #Unitarizing
         #for j in range(0,3):
         #    normalizconst=normalizconst+M[s,2,j]*conjugate(M[s,2,j])
@@ -107,97 +107,192 @@ def update(U,M):
     N=4
     gamma=zeros((3,3),dtype=complex)
     old_U=zeros((3,3),dtype=complex)
-    x=[0,0,0,0]
-    y=[0,0,0,0]
     beta=5.5
-
-    for x[0] in range(0,N):
-        for x[1] in range(0,N):
-            for x[2] in range(0,N):
-                for x[3] in range(0,N):
+    for t in range(0,N):
+        for x in range(0,N):
+            for y in range(0,N):
+                for z in range(0,N):
                     for mi in range(0,4):
                         for n in range(0,3):
                             for i in range(0,3):
-                                old_U[i,n] = U[x[0],x[1],x[2],x[3],mi,i,n] # save original value
+                                old_U[i,n] = U[t,x,y,z,mi,i,n] # save original value
                         s=random.randint(4,2*Nmatrix-2) #Choose a random matrix
-                        y=x
-                        gamma=Gamma(U,mi,y[0],y[1],y[2],y[3]) #compute Gamma
-                        U[x[0],x[1],x[2],x[3],mi] = dot(M[s],U[x[0],x[1],x[2],x[3],mi]) # update U
-                        deter=linalg.det(U[x[0],x[1],x[2],x[3],mi])
+                        gamma=Gamma(U,mi,t,x,y,z) #compute Gamma
+                        U[t,x,y,z,mi] = rXc(M[s],U[t,x,y,z,mi]) # update U
+                        deter=linalg.det(U[t,x,y,z,mi])
                         err=abs(1.-deter)
-                        if err>0.01:
+                        if err>1:
                             print(deter,linalg.det(M[s]),linalg.det(old_U),s)
-                        dS = -beta/(3)*real(trace(rXc((U[x[0],x[1],x[2],x[3],mi]-old_U),gamma))) # change in action
-                        if dS>0and exp(-dS)<random.uniform(0,1):
-                            U[x[0],x[1],x[2],x[3],mi] = old_U # restore old value
+                            print(U[t,x,y,z,mi],M[s],old_U)
+                        dS = -beta/(3)*real(trace(rXc((U[t,x,y,z,mi]-old_U),gamma))) # change in action
+                        if dS>0 and exp(-dS)<random.uniform(0,1):
+                            U[t,x,y,z,mi] = old_U # restore old value
 
 
 #Function that compute gamma for QCD using the easiest action
 #input:-i,j,k,l: position in which gamma is computed
 #      -U:array of link variables
 #inner parameter:-N:total number of points in the lattice
-def Gamma(U,mi,i,j,k,l):
+def Gamma(U,mi,t,x,y,z):
     N=4
     Gamma=zeros((3,3),dtype=complex)
-    xpni=[0,0,0,0]
-    xpmi=[0,0,0,0]
-    xpmipni=[0,0,0,0]
-    xmni=[0,0,0,0]
-    xpmimni=[0,0,0,0]
-    y=[0,0,0,0]
-    y[0]=i
-    y[1]=j
-    y[2]=k
-    y[3]=l
-    for ni in range(0,4):
-        y[0]=i
-        y[1]=j
-        y[2]=k
-        y[3]=l
-        xpni=y
-        xpmi=y
-        xpmipni=y
-        xmni=y
-        xpmimni=y
 
+    for ni in range(0,4):
+        #upload of the poin on mi
+        if mi==0:
+                #next site on mi
+                tpmi=(t+1)%N
+                xpmi=x
+                ypmi=y
+                zpmi=z
+                #next site on ni and mi
+                tpmipni=(t+1)%N
+                xpmipni=x
+                ypmipni=y
+                zpmipni=z
+                #next site on mi and previous on ni
+                tpmimni=(t+1)%N
+                xpmimni=x
+                ypmimni=y
+                zpmimni=z
+        if mi==1:
+                #next site on mi
+                tpmi=t
+                xpmi=(x+1)%N
+                ypmi=y
+                zpmi=z
+                #next site on ni and mi
+                tpmipni=t
+                xpmipni=(x+1)%N
+                ypmipni=y
+                zpmipni=z
+                #next site on mi and previous on ni
+                tpmimni=t
+                xpmimni=(x+1)%N
+                ypmimni=y
+                zpmimni=z
+        if mi==2:
+                #next site on mi
+                tpmi=t
+                xpmi=x
+                ypmi=(y+1)%N
+                zpmi=z
+                #next site on ni and mi
+                tpmipni=t
+                xpmipni=x
+                ypmipni=(y+1)%N
+                zpmipni=z
+                #next site on mi and previous on ni
+                tpmimni=t
+                xpmimni=x
+                ypmimni=(y+1)%N
+                zpmimni=z
+        if mi==3:
+                #next site on mi
+                tpmi=t
+                xpmi=x
+                ypmi=y
+                zpmi=(z+1)%N
+                #next site on ni and mi
+                tpmipni=t
+                xpmipni=x
+                ypmipni=y
+                zpmipni=(z+1)%N
+                #next site on mi and previous on ni
+                tpmimni=t
+                xpmimni=x
+                ypmimni=y
+                zpmimni=(z+1)%N
         if ni!=mi :
-            xpni[ni]=(y[ni]+1)%N # next site on ni
-            y[0]=i
-            y[1]=j
-            y[2]=k
-            y[3]=l
-            xpmi[mi]=(y[mi]+1)%N # next site on mi
-            y[0]=i
-            y[1]=j
-            y[2]=k
-            y[3]=l
-            xpmipni[mi]=(y[mi]+1)%N # next site on ni and mi
-            y[0]=i
-            y[1]=j
-            y[2]=k
-            y[3]=l
-            xpmipni[ni]=(y[ni]+1)%N
-            y[0]=i
-            y[1]=j
-            y[2]=k
-            y[3]=l
-            xmni[ni]=(y[ni]-1)%N # previous site on ni
-            y[0]=i
-            y[1]=j
-            y[2]=k
-            y[3]=l
-            xpmimni[mi]=(y[mi]+1)%N # next site on mi and previous on ni
-            y[0]=i
-            y[1]=j
-            y[2]=k
-            y[3]=l
-            xpmimni[ni]=(y[ni]-1)%N
-            y[0]=i
-            y[1]=j
-            y[2]=k
-            y[3]=l
-            Gamma=Gamma+rXc(rXc(U[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni],dagger(U[xpmipni[0],xpmipni[1],xpmipni[2],xpmipni[3],mi])),dagger(U[y[0],y[1],y[2],y[3],ni]))
-            Gamma=Gamma+rXc(rXc(dagger(U[xpmimni[0],xpmimni[1],xpmimni[2],xpmimni[3],ni]),dagger(U[xmni[0],xmni[1],xmni[2],xmni[3],mi])),U[xmni[0],xmni[1],xmni[2],xmni[3],ni])
+            #unpload of the poin on ni
+            if ni==0:
+                #next site on ni
+                tpni=(t+1)%N
+                xpni=x
+                ypni=y
+                zpni=z
+                #Previous site on ni
+                tmni=(t-1)%N
+                xmni=x
+                ymni=y
+                zmni=z
+                #next site on ni and mi
+                tpmipni=(tpmipni+1)%N
+                xpmipni=xpmipni
+                ypmipni=ypmipni
+                zpmipni=zpmipni
+                #next site on mi and previous on ni
+                tpmimni=(tpmimni-1)%N
+                xpmimni=xpmimni
+                ypmimni=ypmimni
+                zpmimni=zpmimni
+            if ni==1:
+                #next site on ni
+                tpni=t
+                xpni=(x+1)%N
+                ypni=y
+                zpni=z
+                #Previous site on ni
+                tmni=t
+                xmni=(x-1)%N
+                ymni=y
+                zmni=z
+                #next site on ni and mi
+                tpmipni=tpmipni
+                xpmipni=(xpmipni+1)%N
+                ypmipni=ypmipni
+                zpmipni=zpmipni
+                #next site on mi and previous on ni
+                tpmimni=tpmimni
+                xpmimni=(xpmimni-1)%N
+                ypmimni=ypmimni
+                zpmimni=zpmimni
+            if ni==2:
+                #next site on ni
+                tpni=t
+                xpni=x
+                ypni=(y+1)%N
+                zpni=z
+                #Previous site on ni
+                tmni=t
+                xmni=x
+                ymni=(y-1)%N
+                zmni=z
+                #next site on ni and mi
+                tpmipni=tpmipni
+                xpmipni=xpmipni
+                ypmipni=(ypmipni+1)%N
+                zpmipni=zpmipni
+                #next site on mi and previous on ni
+                tpmimni=tpmimni
+                xpmimni=xpmimni
+                ypmimni=(ypmimni-1)%N
+                zpmimni=zpmimni
+            if ni==3:
+                #next site on ni
+                tpni=t
+                xpni=x
+                ypni=y
+                zpni=(z+1)%N
+                #previous site on ni
+                tmni=t
+                xmni=x
+                ymni=y
+                zmni=(z-1)%N
+                #next site on ni and mi
+                tpmipni=tpmipni
+                xpmipni=xpmipni
+                ypmipni=ypmipni
+                zpmipni=(zpmipni+1)%N
+                #next site on mi and previous on ni
+                tpmimni=tpmimni
+                xpmimni=xpmimni
+                ypmimni=ypmimni
+                zpmimni=(zpmimni-1)%N
+
+            Gamma=Gamma+rXc(rXc(U[tpmi,xpmi,ypmi,zpmi,ni],dagger(U[tpmipni,xpmipni,ypmipni,zpmipni,mi])),dagger(U[t,x,y,z,ni]))
+            Gamma=Gamma+rXc(rXc(dagger(U[tpmimni,xpmimni,ypmimni,zpmimni,ni]),dagger(U[tmni,xmni,ymni,zmni,mi])),U[tmni,xmni,ymni,zmni,ni])
+            
     return Gamma
 
 #Function that compute the Wilson Loop for each point of the lattice using the link variables
@@ -205,48 +300,103 @@ def Gamma(U,mi,i,j,k,l):
 #input:-U: array of the link variables
 #      -i,j,k,l:position computed
 #inner parameters:-N:points in the lattice
-def compute_WL(U,i,j,k,l):
+def compute_WL(U,t,x,y,z):
     N=4
-    WL = 0
-    xpni=[0,0,0,0]
-    xpmi=[0,0,0,0]
-    xpmipni=[0,0,0,0]
-    y=[0,0,0,0]
-    y[0]=i
-    y[1]=j
-    y[2]=k
-    y[3]=l
+    WL = 0.
     for mi in range(0,4):
+        #upload of the poin on mi
+        if mi==0:
+                #next site on mi
+                tpmi=(t+1)%N
+                xpmi=x
+                ypmi=y
+                zpmi=z
+                #next site on ni and mi
+                tpmipni=(t+1)%N
+                xpmipni=x
+                ypmipni=y
+                zpmipni=z
+        if mi==1:
+                #next site on mi
+                tpmi=t
+                xpmi=(x+1)%N
+                ypmi=y
+                zpmi=z
+                #next site on ni and mi
+                tpmipni=t
+                xpmipni=(x+1)%N
+                ypmipni=y
+                zpmipni=z
+        if mi==2:
+                #next site on mi
+                tpmi=t
+                xpmi=x
+                ypmi=(y+1)%N
+                zpmi=z
+                #next site on ni and mi
+                tpmipni=t
+                xpmipni=x
+                ypmipni=(y+1)%N
+                zpmipni=z
+        if mi==3:
+                #next site on mi
+                tpmi=t
+                xpmi=x
+                ypmi=y
+                zpmi=(z+1)%N
+                #next site on ni and mi
+                tpmipni=t
+                xpmipni=x
+                ypmipni=y
+                zpmipni=(z+1)%N
         for ni in range(0,4):
-            y[0]=i
-            y[1]=j
-            y[2]=k
-            y[3]=l
-            xpni=y
-            xpmi=y
-            xpmipni=y
             if ni!=mi :
-                xpni[ni]=(y[ni]+1)%N # next site on ni
-                y[0]=i
-                y[1]=j
-                y[2]=k
-                y[3]=l
-                xpmi[mi]=(y[mi]+1)%N # next site on mi
-                y[0]=i
-                y[1]=j
-                y[2]=k
-                y[3]=l
-                xpmipni[mi]=(y[mi]+1)%N # next site on ni and mi
-                y[0]=i
-                y[1]=j
-                y[2]=k
-                y[3]=l
-                xpmipni[ni]=(y[ni]+1)%N
-                y[0]=i
-                y[1]=j
-                y[2]=k
-                y[3]=l
-                WL=WL+trace(rXc(U[y[0],y[1],y[2],y[3],mi],rXc(rXc(U[xpmi[0],xpmi[1],xpmi[2],xpmi[3],ni],dagger(U[xpmipni[0],xpmipni[1],xpmipni[2],xpmipni[3],mi])),dagger(U[y[0],y[1],y[2],y[3],ni]))))
+                #unpload of the poin on ni
+                if ni==0:
+                    #next site on ni
+                    tpni=(t+1)%N
+                    xpni=x
+                    ypni=y
+                    zpni=z
+                    #next site on ni and mi
+                    tpmipni=(tpmipni+1)%N
+                    xpmipni=xpmipni
+                    ypmipni=ypmipni
+                    zpmipni=zpmipni
+                if ni==1:
+                    #next site on ni
+                    tpni=t
+                    xpni=(x+1)%N
+                    ypni=y
+                    zpni=z
+                    #next site on ni and mi
+                    tpmipni=tpmipni
+                    xpmipni=(xpmipni+1)%N
+                    ypmipni=ypmipni
+                    zpmipni=zpmipni
+                if ni==2:
+                    #next site on ni
+                    tpni=t
+                    xpni=x
+                    ypni=(y+1)%N
+                    zpni=z
+                    #next site on ni and mi
+                    tpmipni=tpmipni
+                    xpmipni=xpmipni
+                    ypmipni=(ypmipni+1)%N
+                    zpmipni=zpmipni
+                if ni==3:
+                    #next site on ni
+                    tpni=t
+                    xpni=x
+                    ypni=y
+                    zpni=(z+1)%N
+                    #next site on ni and mi
+                    tpmipni=tpmipni
+                    xpmipni=xpmipni
+                    ypmipni=ypmipni
+                    zpmipni=(zpmipni+1)%N
+                WL=WL+trace(rXc(U[t,x,y,z,mi],rXc(rXc(U[tpmi,xpmi,ypmi,zpmi,ni],dagger(U[tpmipni,xpmipni,ypmipni,zpmipni,mi])),dagger(U[t,x,y,z,ni]))))
 
     return real(WL)/(3.*12)
 
@@ -259,31 +409,30 @@ N_cor=20
 U=zeros((N,N,N,N,4,3,3),dtype=complex) # inizializing U
 WL=ones((N_cf), 'double')
 M=zeros((Nmatrix,3,3),dtype=complex) #inizializing the random matrix
-x=[0,0,0,0]
 # inizializing U with the identity which belongs to the SU(3) group
-for x[0] in range(0,N):
-    for x[1] in range(0,N):
-        for x[2] in range(0,N):
-            for x[3] in range(0,N):
+for t in range(0,N):
+    for x in range(0,N):
+        for y in range(0,N):
+            for z in range(0,N):
                 for mi in range(0,4):
                     for n in range(0,3):
-                        U[x[0],x[1],x[2],x[3],mi,n,n]=1.
+                        U[t,x,y,z,mi,n,n]=1.
 # Generation of the random matrix
 M=randommatrixSU3(M)
 #Computation of the Monte Carlo mean value for the propagator in every time
 #in the lattice
 for j in range(0,5*N_cor): # thermalize U
     update(U,M)
+print('Termalized')
 for alpha in range(0,N_cf): # loop on random paths
     for j in range(0,N_cor):
         update(U,M)
-    x=[0,0,0,0]
     WL[alpha]=0.
-    for x[0] in range(0,N):
-        for x[1] in range(0,N):
-            for x[2] in range(0,N):
-                for x[3] in range(0,N):
-                    WL[alpha] =WL[alpha]+compute_WL(U,x[0],x[1],x[2],x[3])
+    for t in range(0,N):
+        for x in range(0,N):
+            for y in range(0,N):
+                for z in range(0,N):
+                    WL[alpha] =WL[alpha]+compute_WL(U,t,x,y,z)
 
     WL[alpha]=WL[alpha]/N**4
     print(WL[alpha])
