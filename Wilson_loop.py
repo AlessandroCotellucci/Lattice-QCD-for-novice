@@ -13,57 +13,31 @@ def trace(M):
         trace=trace+M[i,i]
     return trace
 
+
+
+
+
 #Function that generate Nmatrix casual matrix belonging to the SU(3) group
 def randommatrixSU3(M):
     identity=eye(3)
     Nmatrix=100
     M=zeros((200,3,3),dtype=complex)
+    H=zeros((3,3),dtype=complex)
     eps=0.24
+    w=cmath.sqrt(-1)
     for s in range(0,Nmatrix):
         for j in range(0,3):
             for i in range(0,3):
-                M[s,j,i]=complex(random.uniform(-1,1),random.uniform(-1,1))
+                H[j,i]=complex(random.uniform(-1,1),random.uniform(-1,1))
         for j in range(0,3):
             for i in range(0,3):
-                M[j,i]=conjugate(M[i,j])
-        for j in range(0,3):
-            for i in range(0,3):
-                M[s,j,i]=identity[j,i]+cmath.sqrt(-1)*eps*M[s,j,i]
-        normalizconst=0.
-        #Unitarizing
-        for j in range(0,3):
-            normalizconst=normalizconst+M[s,0,j]*conjugate(M[s,0,j])
-        normalizconst=sqrt(normalizconst)
-        for j in range(0,3):
-            M[s,0,j]=M[s,0,j]/normalizconst
+                H[j,i]=conjugate(H[i,j])
+        for n in range(30):
+            M[s]=M[s]+(w*eps)**n/math.factorial(n)*linalg.matrix_power(H,n)
+        M[s]=M[s]/linalg.det(M[s])**(1/3)
 
-        M[s,1,0]=(-conjugate(M[s,1,1])*M[s,0,1]-M[s,0,2]*conjugate(M[s,1,2]))/conjugate(M[s,0,0])
-        normalizconst=0.
-        for j in range(0,3):
-            normalizconst=normalizconst+M[s,1,j]*conjugate(M[s,1,j])
-        normalizconst=sqrt(normalizconst)
-        for j in range(0,3):
-            M[s,1,j]=M[s,1,j]/normalizconst
-        M[s,2,0]=conjugate(M[s,0,1])*conjugate(M[s,1,2])-conjugate(M[s,0,2])*conjugate(M[s,1,1])
-        M[s,2,1]=conjugate(M[s,1,0])*conjugate(M[s,0,2])-conjugate(M[s,0,0])*conjugate(M[s,1,2])
-        M[s,2,2]=conjugate(M[s,0,0])*conjugate(M[s,1,1])-conjugate(M[s,1,0])*conjugate(M[s,0,1])
-        #M[s,2,0]=1./(M[s,0,1]*M[s,1,2]-M[s,1,1]*M[s,0,2])*(1-M[s,0,0]*M[s,1,1]*M[s,2,2]-M[s,0,2]*M[s,1,0]*M[s,2,1]+M[s,2,1]*M[s,1,2]*M[s,0,0]+M[s,2,2]*M[s,1,0]*M[s,0,1])
-        #normalizconst=0.
-        #Unitarizing
-        #for j in range(0,3):
-        #    normalizconst=normalizconst+M[s,2,j]*conjugate(M[s,2,j])
-        #normalizconst=sqrt(normalizconst)
-        #for j in range(0,3):
-        #    M[s,2,j]=M[s,2,j]/normalizconst
-        #print(conjugate(M[s,1,0])*M[s,1,0]+M[s,1,1]*conjugate(M[s,1,1])+M[s,1,2]*conjugate(M[s,1,2]))
-        #print(conjugate(M[s,0,0])*M[s,0,0]+conjugate(M[s,0,1])*M[s,0,1]+conjugate(M[s,0,2])*M[s,0,2])
-        #print(conjugate(M[s,1,0])*M[s,2,0]+M[s,2,1]*conjugate(M[s,1,1])+M[s,2,2]*conjugate(M[s,1,2]))
-        #print(conjugate(M[s,0,0])*M[s,2,0]+conjugate(M[s,0,1])*M[s,2,1]+conjugate(M[s,0,2])*M[s,2,2])
-        #print(conjugate(M[s,1,0])*M[s,0,0]+M[s,0,1]*conjugate(M[s,1,1])+M[s,0,2]*conjugate(M[s,1,2]))
-        #print(conjugate(M[s,2,0])*M[s,2,0]+conjugate(M[s,2,1])*M[s,2,1]+conjugate(M[s,2,2])*M[s,2,2])
-        #print('determinante',linalg.det(M[s]))
         M[s+Nmatrix]=dagger(M[s])
-    return M
+    return M.copy()
 
 #Function that compute the dagger of a matrix
 def dagger(M):
@@ -71,8 +45,8 @@ def dagger(M):
     H=zeros((N,N),dtype=complex)
     for i in range(0,N):
         for j in range(0,N):
-            H[i,j]=conjugate(M[j,i])
-    return H
+            H[i,j]=conjugate(M[j,i].copy())
+    return H.copy()
 
 #Function that compute the product of two square matrix with equal dimension
 def rXc(M,H):
@@ -81,22 +55,10 @@ def rXc(M,H):
     for j in range(0,N):
         for i in range(0,N):
             for n in range(0,N):
-                R[i,j]=R[i,j]+M[i,n]*H[n,j]
-    return R
+                R[i,j]=R[i,j]+M[i,n].copy()*H[n,j].copy()
+    return R.copy()
 
 
-#Function that randomly rearrange the simulation to gives more solutions using the
-#'bootstrap' method
-#input:-G:solution of the Monte Carlo simulation
-#inner parameters:-N:number of points in the lattice
-def bootstrap(G):
-    N=len(x)
-    N_cf = len(G)
-    G_bootstrap=ones((N_cf,N), 'double')     # new ensemble
-    for i in range(0,N_cf):
-        alpha = int(random.uniform(0,N_cf)) # choose random config
-        G_bootstrap[i]=G[alpha] # keep G[alpha]
-    return G_bootstrap
 
 #Function that upload the position using a metropolis algoritm considering the decrising
 #in the action using the easiest action for QCD
@@ -105,41 +67,39 @@ def bootstrap(G):
 def update(U,M):
     Nmatrix=100
     N=4
-    gamma=zeros((3,3),dtype=complex)
-    old_U=zeros((3,3),dtype=complex)
     beta=5.5
-    for t in range(0,N):
-        for x in range(0,N):
-            for y in range(0,N):
-                for z in range(0,N):
+    for x in range(0,N):
+        for y in range(0,N):
+            for z in range(0,N):
+                for t in range(0,N):
                     for mi in range(0,4):
-                        for n in range(0,3):
-                            for i in range(0,3):
-                                old_U[i,n] = U[t,x,y,z,mi,i,n] # save original value
-                        s=random.randint(4,2*Nmatrix-2) #Choose a random matrix
-                        gamma=Gamma(U,mi,t,x,y,z) #compute Gamma
-                        U[t,x,y,z,mi] = rXc(M[s],U[t,x,y,z,mi]) # update U
-                        deter=linalg.det(U[t,x,y,z,mi])
-                        err=abs(1.-deter)
-                        if err>1:
-                            print(deter,linalg.det(M[s]),linalg.det(old_U),s)
-                            print(U[t,x,y,z,mi],M[s],old_U)
-                        dS = -beta/(3)*real(trace(rXc((U[t,x,y,z,mi]-old_U),gamma))) # change in action
+                        old_U = U[x,y,z,t,mi].copy() # save original value
+                        s=random.randint(2,2*Nmatrix) #Choose a random matrix
+                        gamma=Gamma(U,mi,x,y,z,t) #compute Gamma
+
+                        U[x,y,z,t,mi] = rXc(M[s].copy(),U[x,y,z,t,mi].copy()) # update U
+                        #deter=linalg.det(U[t,x,y,z,mi])
+                        #err=abs(1.-deter)
+                        #print(trace(U[t,x,y,z,mi]))
+                        #if err>1:
+                        #    print(deter,linalg.det(M[s]),linalg.det(old_U),s)
+                        #    print(U[t,x,y,z,mi],M[s],old_U)
+                        dS = -beta/(3)*real(trace(rXc((U[x,y,z,t,mi].copy()-old_U.copy()),gamma.copy()))) # change in action
                         if dS>0 and exp(-dS)<random.uniform(0,1):
-                            U[t,x,y,z,mi] = old_U # restore old value
+                            U[x,y,z,t,mi] = old_U.copy() # restore old value
 
 
 #Function that compute gamma for QCD using the easiest action
 #input:-i,j,k,l: position in which gamma is computed
 #      -U:array of link variables
 #inner parameter:-N:total number of points in the lattice
-def Gamma(U,mi,t,x,y,z):
+def Gamma(U,mi,x,y,z,t):
     N=4
-    Gamma=zeros((3,3),dtype=complex)
+    Gamma=0.
 
     for ni in range(0,4):
         #upload of the poin on mi
-        if mi==0:
+        if mi==3:
                 #next site on mi
                 tpmi=(t+1)%N
                 xpmi=x
@@ -155,7 +115,7 @@ def Gamma(U,mi,t,x,y,z):
                 xpmimni=x
                 ypmimni=y
                 zpmimni=z
-        if mi==1:
+        if mi==0:
                 #next site on mi
                 tpmi=t
                 xpmi=(x+1)%N
@@ -171,7 +131,7 @@ def Gamma(U,mi,t,x,y,z):
                 xpmimni=(x+1)%N
                 ypmimni=y
                 zpmimni=z
-        if mi==2:
+        if mi==1:
                 #next site on mi
                 tpmi=t
                 xpmi=x
@@ -187,7 +147,7 @@ def Gamma(U,mi,t,x,y,z):
                 xpmimni=x
                 ypmimni=(y+1)%N
                 zpmimni=z
-        if mi==3:
+        if mi==2:
                 #next site on mi
                 tpmi=t
                 xpmi=x
@@ -205,7 +165,7 @@ def Gamma(U,mi,t,x,y,z):
                 zpmimni=(z+1)%N
         if ni!=mi :
             #unpload of the poin on ni
-            if ni==0:
+            if ni==3:
                 #next site on ni
                 tpni=(t+1)%N
                 xpni=x
@@ -226,7 +186,7 @@ def Gamma(U,mi,t,x,y,z):
                 xpmimni=xpmimni
                 ypmimni=ypmimni
                 zpmimni=zpmimni
-            if ni==1:
+            if ni==0:
                 #next site on ni
                 tpni=t
                 xpni=(x+1)%N
@@ -247,7 +207,7 @@ def Gamma(U,mi,t,x,y,z):
                 xpmimni=(xpmimni-1)%N
                 ypmimni=ypmimni
                 zpmimni=zpmimni
-            if ni==2:
+            if ni==1:
                 #next site on ni
                 tpni=t
                 xpni=x
@@ -268,7 +228,7 @@ def Gamma(U,mi,t,x,y,z):
                 xpmimni=xpmimni
                 ypmimni=(ypmimni-1)%N
                 zpmimni=zpmimni
-            if ni==3:
+            if ni==2:
                 #next site on ni
                 tpni=t
                 xpni=x
@@ -290,10 +250,10 @@ def Gamma(U,mi,t,x,y,z):
                 ypmimni=ypmimni
                 zpmimni=(zpmimni-1)%N
 
-            Gamma=Gamma+rXc(rXc(U[tpmi,xpmi,ypmi,zpmi,ni],dagger(U[tpmipni,xpmipni,ypmipni,zpmipni,mi])),dagger(U[t,x,y,z,ni]))
-            Gamma=Gamma+rXc(rXc(dagger(U[tpmimni,xpmimni,ypmimni,zpmimni,ni]),dagger(U[tmni,xmni,ymni,zmni,mi])),U[tmni,xmni,ymni,zmni,ni])
-            
-    return Gamma
+            Gamma=Gamma+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpmipni,ypmipni,zpmipni,tpmipni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))
+            Gamma=Gamma+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni].copy()),dagger(U[xmni,ymni,zmni,tmni,mi].copy())),U[xmni,ymni,zmni,tmni,ni].copy())
+
+    return Gamma.copy()
 
 #Function that compute the Wilson Loop for each point of the lattice using the link variables
 #generated using the Metropolis algoritm
@@ -305,7 +265,7 @@ def compute_WL(U,t,x,y,z):
     WL = 0.
     for mi in range(0,4):
         #upload of the poin on mi
-        if mi==0:
+        if mi==3:
                 #next site on mi
                 tpmi=(t+1)%N
                 xpmi=x
@@ -316,7 +276,7 @@ def compute_WL(U,t,x,y,z):
                 xpmipni=x
                 ypmipni=y
                 zpmipni=z
-        if mi==1:
+        if mi==0:
                 #next site on mi
                 tpmi=t
                 xpmi=(x+1)%N
@@ -327,7 +287,7 @@ def compute_WL(U,t,x,y,z):
                 xpmipni=(x+1)%N
                 ypmipni=y
                 zpmipni=z
-        if mi==2:
+        if mi==1:
                 #next site on mi
                 tpmi=t
                 xpmi=x
@@ -338,7 +298,7 @@ def compute_WL(U,t,x,y,z):
                 xpmipni=x
                 ypmipni=(y+1)%N
                 zpmipni=z
-        if mi==3:
+        if mi==2:
                 #next site on mi
                 tpmi=t
                 xpmi=x
@@ -349,10 +309,10 @@ def compute_WL(U,t,x,y,z):
                 xpmipni=x
                 ypmipni=y
                 zpmipni=(z+1)%N
-        for ni in range(0,4):
+        for ni in range(0,mi):
             if ni!=mi :
                 #unpload of the poin on ni
-                if ni==0:
+                if ni==3:
                     #next site on ni
                     tpni=(t+1)%N
                     xpni=x
@@ -363,7 +323,7 @@ def compute_WL(U,t,x,y,z):
                     xpmipni=xpmipni
                     ypmipni=ypmipni
                     zpmipni=zpmipni
-                if ni==1:
+                if ni==0:
                     #next site on ni
                     tpni=t
                     xpni=(x+1)%N
@@ -374,7 +334,7 @@ def compute_WL(U,t,x,y,z):
                     xpmipni=(xpmipni+1)%N
                     ypmipni=ypmipni
                     zpmipni=zpmipni
-                if ni==2:
+                if ni==1:
                     #next site on ni
                     tpni=t
                     xpni=x
@@ -385,7 +345,7 @@ def compute_WL(U,t,x,y,z):
                     xpmipni=xpmipni
                     ypmipni=(ypmipni+1)%N
                     zpmipni=zpmipni
-                if ni==3:
+                if ni==2:
                     #next site on ni
                     tpni=t
                     xpni=x
@@ -396,7 +356,7 @@ def compute_WL(U,t,x,y,z):
                     xpmipni=xpmipni
                     ypmipni=ypmipni
                     zpmipni=(zpmipni+1)%N
-                WL=WL+trace(rXc(U[t,x,y,z,mi],rXc(rXc(U[tpmi,xpmi,ypmi,zpmi,ni],dagger(U[tpmipni,xpmipni,ypmipni,zpmipni,mi])),dagger(U[t,x,y,z,ni]))))
+                WL=WL+trace(rXc(U[x,y,z,t,mi].copy(),rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpmipni,ypmipni,zpmipni,tpmipni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))))
 
     return real(WL)/(3.*12)
 
@@ -410,13 +370,13 @@ U=zeros((N,N,N,N,4,3,3),dtype=complex) # inizializing U
 WL=ones((N_cf), 'double')
 M=zeros((Nmatrix,3,3),dtype=complex) #inizializing the random matrix
 # inizializing U with the identity which belongs to the SU(3) group
-for t in range(0,N):
-    for x in range(0,N):
-        for y in range(0,N):
-            for z in range(0,N):
+for x in range(0,N):
+    for y in range(0,N):
+        for z in range(0,N):
+            for t in range(0,N):
                 for mi in range(0,4):
                     for n in range(0,3):
-                        U[t,x,y,z,mi,n,n]=1.
+                        U[x,y,z,t,mi,n,n]=1.
 # Generation of the random matrix
 M=randommatrixSU3(M)
 #Computation of the Monte Carlo mean value for the propagator in every time
@@ -428,10 +388,10 @@ for alpha in range(0,N_cf): # loop on random paths
     for j in range(0,N_cor):
         update(U,M)
     WL[alpha]=0.
-    for t in range(0,N):
-        for x in range(0,N):
-            for y in range(0,N):
-                for z in range(0,N):
+    for x in range(0,N):
+        for y in range(0,N):
+            for z in range(0,N):
+                for t in range(0,N):
                     WL[alpha] =WL[alpha]+compute_WL(U,t,x,y,z)
 
     WL[alpha]=WL[alpha]/N**4
