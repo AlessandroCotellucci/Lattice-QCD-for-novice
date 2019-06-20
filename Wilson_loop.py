@@ -29,9 +29,7 @@ def randommatrixSU3(M):
         for j in range(0,3):
             for i in range(0,3):
                 H[j,i]=complex(random.uniform(-1,1),random.uniform(-1,1))
-        for j in range(0,3):
-            for i in range(0,3):
-                H[j,i]=conjugate(H[i,j])
+        H=(H.copy()+dagger(H.copy()))/2.
         for n in range(30):
             M[s]=M[s]+(w*eps)**n/math.factorial(n)*linalg.matrix_power(H,n)
         M[s]=M[s]/linalg.det(M[s])**(1/3)
@@ -50,7 +48,7 @@ def dagger(M):
 
 #Function that compute the product of two square matrix with equal dimension
 def rXc(M,H):
-    N=3
+    N=len(M)
     R=zeros((N,N),dtype=complex)
     for j in range(0,N):
         for i in range(0,N):
@@ -95,7 +93,7 @@ def update(U,M):
 #inner parameter:-N:total number of points in the lattice
 def Gamma(U,mi,x,y,z,t):
     N=4
-    Gamma=0.
+    gamma=0.
 
     for ni in range(0,4):
         #upload of the poin on mi
@@ -250,10 +248,10 @@ def Gamma(U,mi,x,y,z,t):
                 ypmimni=ypmimni
                 zpmimni=(zpmimni-1)%N
 
-            Gamma=Gamma+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpmipni,ypmipni,zpmipni,tpmipni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))
-            Gamma=Gamma+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni].copy()),dagger(U[xmni,ymni,zmni,tmni,mi].copy())),U[xmni,ymni,zmni,tmni,ni].copy())
+            gamma=gamma+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpni,ypni,zpni,tpni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))
+            gamma=gamma+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni].copy()),dagger(U[xmni,ymni,zmni,tmni,mi].copy())),U[xmni,ymni,zmni,tmni,ni].copy())
 
-    return Gamma.copy()
+    return gamma.copy()
 
 #Function that compute the Wilson Loop for each point of the lattice using the link variables
 #generated using the Metropolis algoritm
@@ -356,7 +354,7 @@ def compute_WL(U,t,x,y,z):
                     xpmipni=xpmipni
                     ypmipni=ypmipni
                     zpmipni=(zpmipni+1)%N
-                WL=WL+trace(rXc(U[x,y,z,t,mi].copy(),rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpmipni,ypmipni,zpmipni,tpmipni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))))
+                WL=WL+trace(rXc(U[x,y,z,t,mi].copy(),rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpni,ypni,zpni,tpni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))))
 
     return real(WL)/(3.*12)
 
