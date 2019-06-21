@@ -1,6 +1,6 @@
 # Lattice-QCD-for-novice
 Solutions of the exercices of the paper Lattice QCD for novice
-The code which compute the Wilson loop is not completed.
+The code which compute the static quark potential is not completed.
 Bibliography:
 1. Lattice QCD for novice, G. Peter Lepage
 2. Lattice QCD- A guide for people who want result, Christine Davies
