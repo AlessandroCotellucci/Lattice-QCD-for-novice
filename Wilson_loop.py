@@ -930,12 +930,23 @@ for alpha in range(0,N_cf): # loop on random paths
     WL[alpha]=WL[alpha]/N**4
     WLax2[alpha]=WLax2[alpha]/N**4
     print(alpha+1,WL[alpha],WLax2[alpha]) #print of the results for each configuration
-avg_WL = 0.
-avg_WLax2
+
+avg_WL=0.
+avg_WLax2=0.
+avg_WLSQ=0.
+avg_WLax2SQ=0.
 for alpha in range(0,N_cf): # compute MC averages
     avg_WL= avg_WL+WL[alpha]
     avg_WLax2=avg_WLax2+WLax2[alpha]
-avg_WL = avg_WL/N_cf  #mean value on every configuration
+    avg_WLSQ=avg_WLSQ+WL[alpha]**2
+    avg_WLax2SQ=avg_WLax2SQ+WLax2[alpha]**2
+avg_WL=avg_WL/N_cf  #mean value on every configuration
 avg_WLax2=avg_WLax2/N_cf
-print('Mean value axa','Mean value ax2a')
-print(avg_WL,avg_WLax2) #print of the result
+avg_WLSQ=avg_WLSQ/N_cf
+avg_WLax2SQ=avg_WLax2SQ/N_cf
+err_avg_WL=(abs(avg_WLSQ-avg_WL**2))**(1/2) #statistical error
+err_avg_WLax2=(abs(avg_WLax2SQ-avg_WLax2**2))**(1/2) #statistical error
+
+#print of the results
+print('Mean value of the Wilson loop aX2a:',avg_WL,'+-',err_avg_WL)
+print('Mean value of the Wilson loop aX2a:',avg_WLax2,'+-',err_avg_WLax2)
