@@ -81,7 +81,7 @@ def update(U,M):
                                 U[x,y,z,t,mi] = rXc(M[s].copy(),U[x,y,z,t,mi].copy())  # update U
 
 #Function that compute gamma for QCD using the Wilson action
-#input:-i,j,k,l: position in which gamma is computed
+#input:-x,y,z,t: position in which gamma is computed
 #      -U:array of link variables
 #inner parameter:-N:total number of points in the lattice
 def Gamma(U,mi,x,y,z,t):
@@ -246,7 +246,7 @@ def Gamma(U,mi,x,y,z,t):
     return gamma.copy()
 
 #Function that compute gamma for QCD using the improved action using the rctangle terms
-#input:-i,j,k,l: position in which gamma is computed
+#input:-x,y,z,t: position in which gamma is computed
 #      -U:array of link variables
 #inner parameter:-N:total number of points in the lattice
 def Gamma_improved(U,mi,x,y,z,t):
@@ -656,9 +656,9 @@ def Gamma_improved(U,mi,x,y,z,t):
 #Function that compute the Wilson axa Loop for each point of the lattice using the link variables
 #generated using the Metropolis algoritm
 #input:-U: array of the link variables
-#      -i,j,k,l:position computed
+#      -x,y,z,t:position computed
 #inner parameters:-N:points in the lattice
-def compute_WL(U,t,x,y,z):
+def compute_WL(U,x,y,z,t):
     N=4
     WL = 0.
     for mi in range(0,4):
@@ -761,9 +761,9 @@ def compute_WL(U,t,x,y,z):
 #Function that compute the Wilson Loop ax2a for each point of the lattice using the link variables
 #generated using the Metropolis algoritm
 #input:-U: array of the link variables
-#      -i,j,k,l:position computed
+#      -x,y,z,t:position computed
 #inner parameters:-N:points in the lattice
-def compute_WLax2a(U,t,x,y,z):
+def compute_WLax2a(U,x,y,z,t):
     N=4
     WL = 0.
     for mi in range(0,4):
@@ -926,8 +926,8 @@ for alpha in range(0,N_cf): # loop on random paths
         for y in range(0,N):
             for z in range(0,N):
                 for t in range(0,N):
-                    WL[alpha] =WL[alpha]+compute_WL(U,t,x,y,z) #axa Wilson loop
-                    WLax2[alpha]=WLax2[alpha]+compute_WLax2a(U,t,x,y,z) #ax2a Wilson loop
+                    WL[alpha] =WL[alpha]+compute_WL(U,x,y,z,t) #axa Wilson loop
+                    WLax2[alpha]=WLax2[alpha]+compute_WLax2a(U,x,y,z,t) #ax2a Wilson loop
     WL[alpha]=WL[alpha]/N**4
     WLax2[alpha]=WLax2[alpha]/N**4
     print(alpha+1,WL[alpha],WLax2[alpha]) #print of the results for each configuration
@@ -940,4 +940,3 @@ avg_WL = avg_WL/N_cf  #mean value on every configuration
 avg_WLax2=avg_WLax2/N_cf
 print('Mean value axa','Mean value ax2a')
 print(avg_WL,avg_WLax2) #print of the result
-
