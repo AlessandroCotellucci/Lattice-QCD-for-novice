@@ -944,8 +944,8 @@ avg_WL=avg_WL/N_cf  #mean value on every configuration
 avg_WLax2=avg_WLax2/N_cf
 avg_WLSQ=avg_WLSQ/N_cf
 avg_WLax2SQ=avg_WLax2SQ/N_cf
-err_avg_WL=(abs(avg_WLSQ-avg_WL**2))**(1/2) #statistical error
-err_avg_WLax2=(abs(avg_WLax2SQ-avg_WLax2**2))**(1/2) #statistical error
+err_avg_WL=(abs(avg_WLSQ-avg_WL**2)/N_cf)**(1/2) #statistical error
+err_avg_WLax2=(abs(avg_WLax2SQ-avg_WLax2**2)/N_cf)**(1/2) #statistical error
 
 #print of the results
 print('Mean value of the Wilson loop aX2a:',avg_WL,'+-',err_avg_WL)
