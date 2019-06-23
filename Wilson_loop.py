@@ -1,6 +1,5 @@
 import matplotlib
 from matplotlib import pyplot as plt
-import vegas
 import math
 import cmath
 import random
