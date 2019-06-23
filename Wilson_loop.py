@@ -58,7 +58,7 @@ def randommatrixSU3(M):
 #inner parameters: -N:total number of points in the lattice
 def update(U,M):
     Nmatrix=100
-    N=4
+    N=8
     beta=5.5
     beta_imp=1.719
     u0=0.797
@@ -73,7 +73,8 @@ def update(U,M):
                             gamma_imp=Gamma_improved(U,mi,x,y,z,t) #compute Gamma improved if it is asked
                         for p in range(10): #iteration before changing site of the lattice
                             s=random.randint(2,2*Nmatrix) #Choose a random matrix
-                            dS = -beta/(3)*real(trace(rXc((rXc(M[s].copy(),U[x,y,z,t,mi].copy())-U[x,y,z,t,mi].copy()),gamma.copy()))) # change in action
+                            if imp==0:
+                                dS = -beta/(3)*real(trace(rXc((rXc(M[s].copy(),U[x,y,z,t,mi].copy())-U[x,y,z,t,mi].copy()),gamma.copy()))) # change in action
                             if imp==1: #condition to use the improved action
                                 dS = -beta_imp/(3)*(5/(3*u0**4)*real(trace(rXc((rXc(M[s],U[x,y,z,t,mi])-U[x,y,z,t,mi]),gamma)))-1/(12*u0**6)*real(trace(rXc((rXc(M[s],U[x,y,z,t,mi])-U[x,y,z,t,mi]),gamma_imp)))) # change in the improved action
                             if dS<0 or exp(-dS)>random.uniform(0,1):
@@ -84,7 +85,7 @@ def update(U,M):
 #      -U:array of link variables
 #inner parameter:-N:total number of points in the lattice
 def Gamma(U,mi,x,y,z,t):
-    N=4
+    N=8
     gamma=0. #inizializing gamma
     for ni in range(0,4):
         #upload of the poin on mi
@@ -249,7 +250,7 @@ def Gamma(U,mi,x,y,z,t):
 #      -U:array of link variables
 #inner parameter:-N:total number of points in the lattice
 def Gamma_improved(U,mi,x,y,z,t):
-    N=4
+    N=8
     gamma=0. #inizializing gamma
     for ni in range(0,4):
         #upload of the poin on mi
@@ -658,7 +659,7 @@ def Gamma_improved(U,mi,x,y,z,t):
 #      -x,y,z,t:position computed
 #inner parameters:-N:points in the lattice
 def compute_WL(U,x,y,z,t):
-    N=4
+    N=8
     WL = 0.
     for mi in range(0,4):
         #upload of the poin on mi
@@ -763,7 +764,7 @@ def compute_WL(U,x,y,z,t):
 #      -x,y,z,t:position computed
 #inner parameters:-N:points in the lattice
 def compute_WLax2a(U,x,y,z,t):
-    N=4
+    N=8
     WL = 0.
     for mi in range(0,4):
         #upload of the poin on mi
@@ -890,10 +891,10 @@ def compute_WLax2a(U,x,y,z,t):
 
 #allocation of the arrays and definition of the parameters
 a=0.25
-N=4
+N=8
 Nmatrix=200
 N_cf=10
-N_cor=20
+N_cor=50
 U=zeros((N,N,N,N,4,3,3),dtype=complex) # inizializing U
 WL=ones((N_cf), 'double')
 WLax2=ones((N_cf), 'double')
@@ -910,12 +911,14 @@ for x in range(0,N):
 # Generation of the random matrix
 M=randommatrixSU3(M)
 
-for j in range(0,5*N_cor): # thermalize U
+for j in range(0,2*N_cor): # thermalize U
     update(U,M)
 print('Termalized')
 #Computation of the Wilson Loop for every point in the lattice and for every
 #configuration
+file1 = open("Results.txt","w")
 print('Iteration','Wilson loop for axa','Wilson loop for ax2a')
+file1.write('Iteration    Wilson loop for axa    Wilson loop for ax2a')
 for alpha in range(0,N_cf): # loop on random paths
     for j in range(0,N_cor):
         update(U,M)
@@ -929,8 +932,15 @@ for alpha in range(0,N_cf): # loop on random paths
                     WLax2[alpha]=WLax2[alpha]+compute_WLax2a(U,x,y,z,t) #ax2a Wilson loop
     WL[alpha]=WL[alpha]/N**4
     WLax2[alpha]=WLax2[alpha]/N**4
+    file1.write('\n')  #print on a file
+    file1.write(str(alpha+1))
+    file1.write('   ')
+    file1.write(str(WL[alpha]))
+    file1.write('   ')
+    file1.write(str(WLax2[alpha]))
+    file1.write('   ')
     print(alpha+1,WL[alpha],WLax2[alpha]) #print of the results for each configuration
-
+file1.write('\n')
 avg_WL=0.
 avg_WLax2=0.
 avg_WLSQ=0.
@@ -948,5 +958,15 @@ err_avg_WL=(abs(avg_WLSQ-avg_WL**2)/N_cf)**(1/2) #statistical error
 err_avg_WLax2=(abs(avg_WLax2SQ-avg_WLax2**2)/N_cf)**(1/2) #statistical error
 
 #print of the results
-print('Mean value of the Wilson loop aX2a:',avg_WL,'+-',err_avg_WL)
+print('Mean value of the Wilson loop aXa:',avg_WL,'+-',err_avg_WL)
 print('Mean value of the Wilson loop aX2a:',avg_WLax2,'+-',err_avg_WLax2)
+file1.write('Mean value of the Wilson loop aX2a:  ')
+file1.write(str(avg_WL))
+file1.write('+-')
+file1.write(str(err_avg_WL))
+file1.write('\n')
+file1.write('Mean value of the Wilson loop aX2a:  ')
+file1.write(str(avg_WLax2))
+file1.write('+-')
+file1.write(str(err_avg_WLax2))
+file1.close()
