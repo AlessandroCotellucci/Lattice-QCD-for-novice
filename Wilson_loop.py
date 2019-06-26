@@ -707,7 +707,7 @@ def compute_WL(U,x,y,z,t):
                 xpmipni=x
                 ypmipni=y
                 zpmipni=(z+1)%N
-        for ni in range(0,4):
+        for ni in range(0,mi):
             if ni!=mi :
                 #unpload of the poin on ni
                 if ni==3:
@@ -756,7 +756,7 @@ def compute_WL(U,x,y,z,t):
                     zpmipni=(zpmipni+1)%N
                 WL=WL+trace(rXc(U[x,y,z,t,mi].copy(),rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpni,ypni,zpni,tpni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))))
 
-    return real(WL)/(3.*12)
+    return real(WL)/(3.*6.)
 
 #Function that compute the Wilson Loop ax2a for each point of the lattice using the link variables
 #generated using the Metropolis algoritm
@@ -812,7 +812,7 @@ def compute_WLax2a(U,x,y,z,t):
                 xpmipni=x
                 ypmipni=y
                 zpmipni=(z+1)%N
-        for ni in range(0,4):
+        for ni in range(3,mi,-1):
             if ni!=mi :
                 #unpload of the poin on ni
                 if ni==3:
@@ -884,7 +884,7 @@ def compute_WLax2a(U,x,y,z,t):
                         rXc(dagger(U[xp2ni,yp2ni,zp2ni,tp2ni,mi].copy()), \
                         rXc(dagger(U[xpni,ypni,zpni,tpni,ni].copy()),dagger(U[x,y,z,t,ni].copy()))))))
 
-    return real(WL)/(3.*12)
+    return real(WL)/(3.*6.)
 
 
 
