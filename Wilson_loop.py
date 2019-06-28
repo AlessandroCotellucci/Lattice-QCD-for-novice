@@ -62,21 +62,21 @@ def update(U,M):
     beta=5.5
     beta_imp=1.719
     u0=0.797
-    imp=0 #default use of Wilson action
+    improved=False #default use of Wilson action
     for x in range(0,N):
         for y in range(0,N):
             for z in range(0,N):
                 for t in range(0,N):
                     for mi in range(0,4):
                         gamma=Gamma(U,mi,x,y,z,t) #compute Gamma
-                        if imp==1: #condition to use the improved action
+                        if improved: #condition to use the improved action
                             gamma_imp=Gamma_improved(U,mi,x,y,z,t) #compute Gamma improved if it is asked
                         for p in range(10): #iteration before changing site of the lattice
-                            s=random.randint(2,2*Nmatrix) #Choose a random matrix
-                            if imp==0:
-                                dS = -beta/(3)*real(trace(rXc((rXc(M[s].copy(),U[x,y,z,t,mi].copy())-U[x,y,z,t,mi].copy()),gamma.copy()))) # change in action
-                            if imp==1: #condition to use the improved action
+                            s=random.randint(2,2*Nmatrix) #Choose a random matrix            
+                            if improved: #condition to use the improved action
                                 dS = -beta_imp/(3)*(5/(3*u0**4)*real(trace(rXc((rXc(M[s],U[x,y,z,t,mi])-U[x,y,z,t,mi]),gamma)))-1/(12*u0**6)*real(trace(rXc((rXc(M[s],U[x,y,z,t,mi])-U[x,y,z,t,mi]),gamma_imp)))) # change in the improved action
+                            else:
+                                dS = -beta/(3)*real(trace(rXc((rXc(M[s].copy(),U[x,y,z,t,mi].copy())-U[x,y,z,t,mi].copy()),gamma.copy()))) # change in action
                             if dS<0 or exp(-dS)>random.uniform(0,1):
                                 U[x,y,z,t,mi] = rXc(M[s].copy(),U[x,y,z,t,mi].copy())  # update U
 
