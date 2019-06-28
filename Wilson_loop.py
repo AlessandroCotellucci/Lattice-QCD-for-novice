@@ -80,6 +80,7 @@ def update(U,M):
                             if dS<0 or exp(-dS)>random.uniform(0,1):
                                 U[x,y,z,t,mi] = rXc(M[s].copy(),U[x,y,z,t,mi].copy())  # update U
 
+
 #Function that compute gamma for QCD using the Wilson action
 #input:-x,y,z,t: position in which gamma is computed
 #      -U:array of link variables
@@ -87,163 +88,43 @@ def update(U,M):
 def Gamma(U,mi,x,y,z,t):
     N=8
     gamma=0. #inizializing gamma
+    incmi=zeros((4),'int')
+    incni=zeros((4),'int')
+    incmi[mi]=1 #increment in the mi direction
+    #next site on mi
+    xpmi=(x+incmi[0].copy())%N
+    ypmi=(y+incmi[1].copy())%N
+    zpmi=(z+incmi[2].copy())%N
+    tpmi=(t+incmi[3].copy())%N
     for ni in range(0,4):
-        #upload of the poin on mi
-        if mi==3:
-                #next site on mi
-                tpmi=(t+1)%N
-                xpmi=x
-                ypmi=y
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=(t+1)%N
-                xpmipni=x
-                ypmipni=y
-                zpmipni=z
-                #next site on mi and previous on ni
-                tpmimni=(t+1)%N
-                xpmimni=x
-                ypmimni=y
-                zpmimni=z
-        if mi==0:
-                #next site on mi
-                tpmi=t
-                xpmi=(x+1)%N
-                ypmi=y
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=(x+1)%N
-                ypmipni=y
-                zpmipni=z
-                #next site on mi and previous on ni
-                tpmimni=t
-                xpmimni=(x+1)%N
-                ypmimni=y
-                zpmimni=z
-        if mi==1:
-                #next site on mi
-                tpmi=t
-                xpmi=x
-                ypmi=(y+1)%N
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=x
-                ypmipni=(y+1)%N
-                zpmipni=z
-                #next site on mi and previous on ni
-                tpmimni=t
-                xpmimni=x
-                ypmimni=(y+1)%N
-                zpmimni=z
-        if mi==2:
-                #next site on mi
-                tpmi=t
-                xpmi=x
-                ypmi=y
-                zpmi=(z+1)%N
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=x
-                ypmipni=y
-                zpmipni=(z+1)%N
-                #next site on mi and previous on ni
-                tpmimni=t
-                xpmimni=x
-                ypmimni=y
-                zpmimni=(z+1)%N
         if ni!=mi :
-            #unpload of the poin on ni
-            if ni==3:
-                #next site on ni
-                tpni=(t+1)%N
-                xpni=x
-                ypni=y
-                zpni=z
-                #Previous site on ni
-                tmni=(t-1)%N
-                xmni=x
-                ymni=y
-                zmni=z
-                #next site on ni and mi
-                tpmipni=(tpmipni+1)%N
-                xpmipni=xpmipni
-                ypmipni=ypmipni
-                zpmipni=zpmipni
-                #next site on mi and previous on ni
-                tpmimni=(tpmimni-1)%N
-                xpmimni=xpmimni
-                ypmimni=ypmimni
-                zpmimni=zpmimni
-            if ni==0:
-                #next site on ni
-                tpni=t
-                xpni=(x+1)%N
-                ypni=y
-                zpni=z
-                #Previous site on ni
-                tmni=t
-                xmni=(x-1)%N
-                ymni=y
-                zmni=z
-                #next site on ni and mi
-                tpmipni=tpmipni
-                xpmipni=(xpmipni+1)%N
-                ypmipni=ypmipni
-                zpmipni=zpmipni
-                #next site on mi and previous on ni
-                tpmimni=tpmimni
-                xpmimni=(xpmimni-1)%N
-                ypmimni=ypmimni
-                zpmimni=zpmimni
-            if ni==1:
-                #next site on ni
-                tpni=t
-                xpni=x
-                ypni=(y+1)%N
-                zpni=z
-                #Previous site on ni
-                tmni=t
-                xmni=x
-                ymni=(y-1)%N
-                zmni=z
-                #next site on ni and mi
-                tpmipni=tpmipni
-                xpmipni=xpmipni
-                ypmipni=(ypmipni+1)%N
-                zpmipni=zpmipni
-                #next site on mi and previous on ni
-                tpmimni=tpmimni
-                xpmimni=xpmimni
-                ypmimni=(ypmimni-1)%N
-                zpmimni=zpmimni
-            if ni==2:
-                #next site on ni
-                tpni=t
-                xpni=x
-                ypni=y
-                zpni=(z+1)%N
-                #previous site on ni
-                tmni=t
-                xmni=x
-                ymni=y
-                zmni=(z-1)%N
-                #next site on ni and mi
-                tpmipni=tpmipni
-                xpmipni=xpmipni
-                ypmipni=ypmipni
-                zpmipni=(zpmipni+1)%N
-                #next site on mi and previous on ni
-                tpmimni=tpmimni
-                xpmimni=xpmimni
-                ypmimni=ypmimni
-                zpmimni=(zpmimni-1)%N
-
+            incni[ni]=1 #increment in the ni direction
+            #next site on ni
+            xpni=(x+incni[0].copy())%N
+            ypni=(y+incni[1].copy())%N
+            zpni=(z+incni[2].copy())%N
+            tpni=(t+incni[3].copy())%N
+            #Previous site on ni
+            xmni=(x-incni[0].copy())%N
+            ymni=(y-incni[1].copy())%N
+            zmni=(z-incni[2].copy())%N
+            tmni=(t-incni[3].copy())%N
+            #next site on ni and mi
+            xpmipni=(x+incmi[0].copy()+incni[0].copy())%N
+            ypmipni=(y+incmi[1].copy()+incni[1].copy())%N
+            zpmipni=(z+incmi[2].copy()+incni[2].copy())%N
+            tpmipni=(t+incmi[3].copy()+incni[3].copy())%N
+            #next site on mi and previous on ni
+            xpmimni=(x+incmi[0].copy()-incni[0].copy())%N
+            ypmimni=(y+incmi[1].copy()-incni[1].copy())%N
+            zpmimni=(z+incmi[2].copy()-incni[2].copy())%N
+            tpmimni=(t+incmi[3].copy()-incni[3].copy())%N
+            incni[ni]=0
             gamma=gamma+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpni,ypni,zpni,tpni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))
             gamma=gamma+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni].copy()),dagger(U[xmni,ymni,zmni,tmni,mi].copy())),U[xmni,ymni,zmni,tmni,ni].copy())
 
     return gamma.copy()
+
 
 #Function that compute gamma for QCD using the improved action using the rctangle terms
 #input:-x,y,z,t: position in which gamma is computed
@@ -251,407 +132,88 @@ def Gamma(U,mi,x,y,z,t):
 #inner parameter:-N:total number of points in the lattice
 def Gamma_improved(U,mi,x,y,z,t):
     N=8
-    gamma=0. #inizializing gamma
-    for ni in range(0,4):
-        #upload of the poin on mi
-        if mi==3:
-                #next site on mi
-                tpmi=(t+1)%N
-                xpmi=x
-                ypmi=y
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=(t+1)%N
-                xpmipni=x
-                ypmipni=y
-                zpmipni=z
-                #next site on mi and previous on ni
-                tpmimni=(t+1)%N
-                xpmimni=x
-                ypmimni=y
-                zpmimni=z
-                #next site on 2mi
-                tp2mi=(t+2)%N
-                xp2mi=x
-                yp2mi=y
-                zp2mi=z
-                #previous site on mi
-                tmmi=(t-1)%N
-                xmmi=x
-                ymmi=y
-                zmmi=z
-                #next site on 2mi and previous on ni
-                tp2mimni=(t+2)%N
-                xp2mimni=x
-                yp2mimni=y
-                zp2mimni=z
-                #next site on mi and previous on 2ni
-                tpmim2ni=(t+1)%N
-                xpmim2ni=x
-                ypmim2ni=y
-                zpmim2ni=z
-                #previous on ni and mi
-                tmmimni=(t-1)%N
-                xmmimni=x
-                ymmimni=y
-                zmmimni=z
-                #next site on ni and previous on mi
-                tmmipni=(t-1)%N
-                xmmipni=x
-                ymmipni=y
-                zmmipni=z
-        if mi==0:
-                #next site on mi
-                tpmi=t
-                xpmi=(x+1)%N
-                ypmi=y
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=(x+1)%N
-                ypmipni=y
-                zpmipni=z
-                #next site on mi and previous on ni
-                tpmimni=t
-                xpmimni=(x+1)%N
-                ypmimni=y
-                zpmimni=z
-                #next site on 2mi
-                tp2mi=t
-                xp2mi=(x+2)%N
-                yp2mi=y
-                zp2mi=z
-                #previous site on mi
-                tmmi=t
-                xmmi=(x-1)%N
-                ymmi=y
-                zmmi=z
-                #next site on 2mi and previous on ni
-                tp2mimni=t
-                xp2mimni=(x+2)%N
-                yp2mimni=y
-                zp2mimni=z
-                #next site on mi and previous on 2ni
-                tpmim2ni=t
-                xpmim2ni=(x+1)%N
-                ypmim2ni=y
-                zpmim2ni=z
-                #previous on ni and mi
-                tmmimni=t
-                xmmimni=(x-1)%N
-                ymmimni=y
-                zmmimni=z
-                #next site on ni and previous on mi
-                tmmipni=t
-                xmmipni=(x-1)%N
-                ymmipni=y
-                zmmipni=z
-        if mi==1:
-                #next site on mi
-                tpmi=t
-                xpmi=x
-                ypmi=(y+1)%N
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=x
-                ypmipni=(y+1)%N
-                zpmipni=z
-                #next site on mi and previous on ni
-                tpmimni=t
-                xpmimni=x
-                ypmimni=(y+1)%N
-                zpmimni=z
-                #next site on 2mi
-                tp2mi=t
-                xp2mi=x
-                yp2mi=(y+2)%N
-                zp2mi=z
-                #previous site on mi
-                tmmi=t
-                xmmi=x
-                ymmi=(y-1)%N
-                zmmi=z
-                #next site on 2mi and previous on ni
-                tp2mimni=t
-                xp2mimni=x
-                yp2mimni=(y+2)%N
-                zp2mimni=z
-                #next site on mi and previous on 2ni
-                tpmim2ni=t
-                xpmim2ni=x
-                ypmim2ni=(y+1)%N
-                zpmim2ni=z
-                #previous on ni and mi
-                tmmimni=t
-                xmmimni=x
-                ymmimni=(y-1)%N
-                zmmimni=z
-                #next site on ni and previous on mi
-                tmmipni=t
-                xmmipni=x
-                ymmipni=(y-1)%N
-                zmmipni=z
-        if mi==2:
-                #next site on mi
-                tpmi=t
-                xpmi=x
-                ypmi=y
-                zpmi=(z+1)%N
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=x
-                ypmipni=y
-                zpmipni=(z+1)%N
-                #next site on mi and previous on ni
-                tpmimni=t
-                xpmimni=x
-                ypmimni=y
-                zpmimni=(z+1)%N
-                #next site on 2mi
-                tp2mi=t
-                xp2mi=x
-                yp2mi=y
-                zp2mi=(z+2)%N
-                #previous site on mi
-                tmmi=t
-                xmmi=x
-                ymmi=y
-                zmmi=(z-1)%N
-                #next site on 2mi and previous on ni
-                tp2mimni=t
-                xp2mimni=x
-                yp2mimni=y
-                zp2mimni=(z+2)%N
-                #next site on mi and previous on 2ni
-                tpmim2ni=t
-                xpmim2ni=x
-                ypmim2ni=y
-                zpmim2ni=(z+1)%N
-                #previous on ni and mi
-                tmmimni=t
-                xmmimni=x
-                ymmimni=y
-                zmmimni=(z-1)%N
-                #next site on ni and previous on mi
-                tmmipni=t
-                xmmipni=x
-                ymmipni=y
-                zmmipni=(z-1)%N
-        if ni!=mi :
-            #unpload of the poin on ni
-            if ni==3:
-                #next site on ni
-                tpni=(t+1)%N
-                xpni=x
-                ypni=y
-                zpni=z
-                #Previous site on ni
-                tmni=(t-1)%N
-                xmni=x
-                ymni=y
-                zmni=z
-                #next site on ni and mi
-                tpmipni=(tpmipni+1)%N
-                xpmipni=xpmipni
-                ypmipni=ypmipni
-                zpmipni=zpmipni
-                #next site on mi and previous on ni
-                tpmimni=(tpmimni-1)%N
-                xpmimni=xpmimni
-                ypmimni=ypmimni
-                zpmimni=zpmimni
-                #next site on 2ni
-                tp2ni=(t+2)%N
-                xp2ni=x
-                yp2ni=y
-                zp2ni=z
-                #Previous site on 2ni
-                tm2ni=(t-2)%N
-                xm2ni=x
-                ym2ni=y
-                zm2ni=z
-                #next site on 2mi and previous on ni
-                tp2mimni=(tp2mimni-1)%N
-                xp2mimni=xp2mimni
-                yp2mimni=yp2mimni
-                zp2mimni=zp2mimni
-                #next site on mi and previous on 2ni
-                tpmim2ni=(tpmim2ni-2)%N
-                xpmim2ni=xpmim2ni
-                ypmim2ni=ypmim2ni
-                zpmim2ni=zpmim2ni
-                #previous on ni and mi
-                tmmimni=(tmmimni-1)%N
-                xmmimni=xmmimni
-                ymmimni=ymmimni
-                zmmimni=zmmimni
-                #next site on ni and previous on mi
-                tmmipni=(tmmipni+1)%N
-                xmmipni=xmmipni
-                ymmipni=ymmipni
-                zmmipni=zmmipni
-            if ni==0:
-                #next site on ni
-                tpni=t
-                xpni=(x+1)%N
-                ypni=y
-                zpni=z
-                #Previous site on ni
-                tmni=t
-                xmni=(x-1)%N
-                ymni=y
-                zmni=z
-                #next site on ni and mi
-                tpmipni=tpmipni
-                xpmipni=(xpmipni+1)%N
-                ypmipni=ypmipni
-                zpmipni=zpmipni
-                #next site on mi and previous on ni
-                tpmimni=tpmimni
-                xpmimni=(xpmimni-1)%N
-                ypmimni=ypmimni
-                zpmimni=zpmimni
-                #next site on 2ni
-                tp2ni=t
-                xp2ni=(x+2)%N
-                yp2ni=y
-                zp2ni=z
-                #previous site on 2ni
-                tm2ni=t
-                xm2ni=(x-2)%N
-                ym2ni=y
-                zm2ni=z
-                #next site on 2mi and previous on ni
-                tp2mimni=tp2mimni
-                xp2mimni=(xp2mimni-1)%N
-                yp2mimni=yp2mimni
-                zp2mimni=zp2mimni
-                #next site on mi and previous on 2ni
-                tpmim2ni=tpmim2ni
-                xpmim2ni=(xpmim2ni-2)%N
-                ypmim2ni=ypmim2ni
-                zpmim2ni=zpmim2ni
-                #previous on ni and mi
-                tmmimni=tmmimni
-                xmmimni=(xmmimni-1)%N
-                ymmimni=ymmimni
-                zmmimni=zmmimni
-                #next site on ni and previous on mi
-                tmmipni=tmmipni
-                xmmipni=(xmmipni+1)%N
-                ymmipni=ymmipni
-                zmmipni=zmmipni
-            if ni==1:
-                #next site on ni
-                tpni=t
-                xpni=x
-                ypni=(y+1)%N
-                zpni=z
-                #Previous site on ni
-                tmni=t
-                xmni=x
-                ymni=(y-1)%N
-                zmni=z
-                #next site on ni and mi
-                tpmipni=tpmipni
-                xpmipni=xpmipni
-                ypmipni=(ypmipni+1)%N
-                zpmipni=zpmipni
-                #next site on mi and previous on ni
-                tpmimni=tpmimni
-                xpmimni=xpmimni
-                ypmimni=(ypmimni-1)%N
-                zpmimni=zpmimni
-                #next site on 2ni
-                tp2ni=t
-                xp2ni=x
-                yp2ni=(y+2)%N
-                zp2ni=z
-                #Previous site on 2ni
-                tm2ni=t
-                xm2ni=x
-                ym2ni=(y-2)%N
-                zm2ni=z
-                #next site on 2mi and previous on ni
-                tp2mimni=tp2mimni
-                xp2mimni=xp2mimni
-                yp2mimni=(yp2mimni-1)%N
-                zp2mimni=zp2mimni
-                #next site on mi and previous on 2ni
-                tpmim2ni=tpmim2ni
-                xpmim2ni=xpmim2ni
-                ypmim2ni=(ypmim2ni-2)%N
-                zpmim2ni=zpmim2ni
-                #previous on ni and mi
-                tmmimni=tmmimni
-                xmmimni=(xmmimni-1)%N
-                ymmimni=ymmimni
-                zmmimni=zmmimni
-                #next site on ni and previous on mi
-                tmmipni=tmmipni
-                xmmipni=xmmipni
-                ymmipni=(ymmipni+1)%N
-                zmmipni=zmmipni
-            if ni==2:
-                #next site on ni
-                tpni=t
-                xpni=x
-                ypni=y
-                zpni=(z+1)%N
-                #previous site on ni
-                tmni=t
-                xmni=x
-                ymni=y
-                zmni=(z-1)%N
-                #next site on ni and mi
-                tpmipni=tpmipni
-                xpmipni=xpmipni
-                ypmipni=ypmipni
-                zpmipni=(zpmipni+1)%N
-                #next site on mi and previous on ni
-                tpmimni=tpmimni
-                xpmimni=xpmimni
-                ypmimni=ypmimni
-                zpmimni=(zpmimni-1)%N
-                #next site on 2ni
-                tp2ni=t
-                xp2ni=x
-                yp2ni=y
-                zp2ni=(z+2)%N
-                #previous site on 2ni
-                tm2ni=t
-                xm2ni=x
-                ym2ni=y
-                zm2ni=(z-2)%N
-                #next site on 2mi and previous on ni
-                tp2mimni=tp2mimni
-                xp2mimni=xp2mimni
-                yp2mimni=yp2mimni
-                zp2mimni=(zp2mimni-1)%N
-                #next site on mi and previous on 2ni
-                tpmim2ni=tpmim2ni
-                xpmim2ni=xpmim2ni
-                ypmim2ni=ypmim2ni
-                zpmim2ni=(zpmim2ni-2)%N
-                #previous on ni and mi
-                tmmimni=tmmimni
-                xmmimni=xmmimni
-                ymmimni=ymmimni
-                zmmimni=(zmmimni-1)%N
-                #next site on ni and mi
-                tmmipni=tmmipni
-                xmmipni=xmmipni
-                ymmipni=ymmipni
-                zmmipni=(zmmipni+1)%N
+    gamma_imp=0. #inizializing gamma
+    incmi=zeros((4),'int')
+    incni=zeros((4),'int')
+    incmi[mi]=1 #increment in the mi direction
+    #next site on mi
+    xpmi=(x+incmi[0].copy())%N
+    ypmi=(y+incmi[1].copy())%N
+    zpmi=(z+incmi[2].copy())%N
+    tpmi=(t+incmi[3].copy())%N
+    #previous site on mi
+    xmmi=(x-incmi[0].copy())%N
+    ymmi=(y-incmi[1].copy())%N
+    zmmi=(z-incmi[2].copy())%N
+    tmmi=(t-incmi[3].copy())%N
+    #next site on 2mi
+    xp2mi=(x+2*incmi[0].copy())%N
+    yp2mi=(y+2*incmi[1].copy())%N
+    zp2mi=(z+2*incmi[2].copy())%N
+    tp2mi=(t+2*incmi[3].copy())%N
 
-            gamma=gamma+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,mi],U[xp2mi,yp2mi,zp2mi,tp2mi,ni]),rXc(dagger(U[xpmipni,ypmipni,zpmipni,tpmipni,mi]),rXc(dagger(U[xpni,ypni,zpni,tpni,mi]),dagger(U[x,y,z,t,ni]))))
-            gamma=gamma+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,mi],dagger(U[xp2mimni,yp2mimni,zp2mimni,tp2mimni,ni])),rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,mi]),rXc(dagger(U[xmni,ymni,zmni,tmni,mi]),U[xmni,ymni,zmni,tmni,ni])))
-            gamma=gamma+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni],U[xpmipni,ypmipni,zpmipni,tpmipni,ni]),rXc(dagger(U[xp2ni,yp2ni,zp2ni,tp2ni,mi]),rXc(dagger(U[xpni,ypni,zpni,tpni,ni]),dagger(U[x,y,z,t,ni]))))
-            gamma=gamma+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni]),dagger(U[xpmim2ni,ypmim2ni,zpmim2ni,tpmim2ni,ni])),rXc(dagger(U[xm2ni,ym2ni,zm2ni,tm2ni,mi]),rXc(U[xm2ni,ym2ni,zm2ni,tm2ni,ni],U[xmni,ymni,zmni,tmni,ni])))
-            gamma=gamma+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni],dagger(U[xpni,ypni,zpni,tpni,mi])),rXc(dagger(U[xmmipni,ymmipni,zmmipni,tmmipni,mi]),rXc(dagger(U[xmmi,ymmi,zmmi,tmmi,ni]),U[xmmi,ymmi,zmmi,tmmi,mi])))
-            gamma=gamma+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni]),dagger(U[xmni,ymni,zmni,tmni,mi])),rXc(dagger(U[xmmimni,ymmimni,zmmimni,tmmimni,mi]),rXc(U[xmmimni,ymmimni,zmmimni,tmmimni,ni],U[xmmi,ymmi,zmmi,tmmi,mi])))
-    return gamma.copy()
+    for ni in range(0,4):
+        if ni!=mi :
+            incni[ni]=1
+            #next site on ni
+            xpni=(x+incni[0].copy())%N
+            ypni=(y+incni[1].copy())%N
+            zpni=(z+incni[2].copy())%N
+            tpni=(t+incni[3].copy())%N
+            #Previous site on ni
+            xmni=(x-incni[0].copy())%N
+            ymni=(y-incni[1].copy())%N
+            zmni=(z-incni[2].copy())%N
+            tmni=(t-incni[3].copy())%N
+            #next site on ni and mi
+            xpmipni=(x+incmi[0].copy()+incni[0].copy())%N
+            ypmipni=(y+incmi[1].copy()+incni[1].copy())%N
+            zpmipni=(z+incmi[2].copy()+incni[2].copy())%N
+            tpmipni=(t+incmi[3].copy()+incni[3].copy())%N
+            #next site on mi and previous on ni
+            xpmimni=(x+incmi[0].copy()-incni[0].copy())%N
+            ypmimni=(y+incmi[1].copy()-incni[1].copy())%N
+            zpmimni=(z+incmi[2].copy()-incni[2].copy())%N
+            tpmimni=(t+incmi[3].copy()-incni[3].copy())%N
+            #next site on 2ni
+            xp2ni=(x+2*incni[0].copy())%N
+            yp2ni=(y+2*incni[1].copy())%N
+            zp2ni=(z+2*incni[2].copy())%N
+            tp2ni=(t+2*incni[3].copy())%N
+            #Previous site on 2ni
+            xm2ni=(x-2*incni[0].copy())%N
+            ym2ni=(y-2*incni[1].copy())%N
+            zm2ni=(z-2*incni[2].copy())%N
+            tm2ni=(t-2*incni[3].copy())%N
+            #next site on 2mi and previous on ni
+            xp2mimni=(x+2*incmi[0].copy()-incni[0].copy())%N
+            yp2mimni=(y+2*incmi[1].copy()-incni[1].copy())%N
+            zp2mimni=(z+2*incmi[2].copy()-incni[2].copy())%N
+            tp2mimni=(t+2*incmi[3].copy()-incni[3].copy())%N
+            #next site on mi and previous on 2ni
+            xpmim2ni=(x+incmi[0].copy()-2*incni[0].copy())%N
+            ypmim2ni=(y+incmi[1].copy()-2*incni[1].copy())%N
+            zpmim2ni=(z+incmi[2].copy()-2*incni[2].copy())%N
+            tpmim2ni=(t+incmi[3].copy()-2*incni[3].copy())%N
+            #previous site on ni and mi
+            xmmimni=(x-incmi[0].copy()-incni[0].copy())%N
+            ymmimni=(y-incmi[1].copy()-incni[1].copy())%N
+            zmmimni=(z-incmi[2].copy()-incni[2].copy())%N
+            tmmimni=(t-incmi[3].copy()-incni[3].copy())%N
+            #next site on ni and previous mi
+            xmmipni=(x-incmi[0].copy()+incni[0].copy())%N
+            ymmipni=(y-incmi[1].copy()+incni[1].copy())%N
+            zmmipni=(z-incmi[2].copy()+incni[2].copy())%N
+            tmmipni=(t-incmi[3].copy()+incni[3].copy())%N
+            incni[ni]=0
+
+            gamma_imp=gamma_imp+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,mi],U[xp2mi,yp2mi,zp2mi,tp2mi,ni]),rXc(dagger(U[xpmipni,ypmipni,zpmipni,tpmipni,mi]),rXc(dagger(U[xpni,ypni,zpni,tpni,mi]),dagger(U[x,y,z,t,ni]))))
+            gamma_imp=gamma_imp+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,mi],dagger(U[xp2mimni,yp2mimni,zp2mimni,tp2mimni,ni])),rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,mi]),rXc(dagger(U[xmni,ymni,zmni,tmni,mi]),U[xmni,ymni,zmni,tmni,ni])))
+            gamma_imp=gamma_imp+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni],U[xpmipni,ypmipni,zpmipni,tpmipni,ni]),rXc(dagger(U[xp2ni,yp2ni,zp2ni,tp2ni,mi]),rXc(dagger(U[xpni,ypni,zpni,tpni,ni]),dagger(U[x,y,z,t,ni]))))
+            gamma_imp=gamma_imp+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni]),dagger(U[xpmim2ni,ypmim2ni,zpmim2ni,tpmim2ni,ni])),rXc(dagger(U[xm2ni,ym2ni,zm2ni,tm2ni,mi]),rXc(U[xm2ni,ym2ni,zm2ni,tm2ni,ni],U[xmni,ymni,zmni,tmni,ni])))
+            gamma_imp=gamma_imp+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni],dagger(U[xpni,ypni,zpni,tpni,mi])),rXc(dagger(U[xmmipni,ymmipni,zmmipni,tmmipni,mi]),rXc(dagger(U[xmmi,ymmi,zmmi,tmmi,ni]),U[xmmi,ymmi,zmmi,tmmi,mi])))
+            gamma_imp=gamma_imp+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni]),dagger(U[xmni,ymni,zmni,tmni,mi])),rXc(dagger(U[xmmimni,ymmimni,zmmimni,tmmimni,mi]),rXc(U[xmmimni,ymmimni,zmmimni,tmmimni,ni],U[xmmi,ymmi,zmmi,tmmi,mi])))
+    return gamma_imp.copy()
 
 #Function that compute the Wilson axa Loop for each point of the lattice using the link variables
 #generated using the Metropolis algoritm
@@ -661,101 +223,26 @@ def Gamma_improved(U,mi,x,y,z,t):
 def compute_WL(U,x,y,z,t):
     N=8
     WL = 0.
+    incmi=zeros((4),'int')
+    incni=zeros((4),'int')
     for mi in range(0,4):
-        #upload of the poin on mi
-        if mi==3:
-                #next site on mi
-                tpmi=(t+1)%N
-                xpmi=x
-                ypmi=y
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=(t+1)%N
-                xpmipni=x
-                ypmipni=y
-                zpmipni=z
-        if mi==0:
-                #next site on mi
-                tpmi=t
-                xpmi=(x+1)%N
-                ypmi=y
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=(x+1)%N
-                ypmipni=y
-                zpmipni=z
-        if mi==1:
-                #next site on mi
-                tpmi=t
-                xpmi=x
-                ypmi=(y+1)%N
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=x
-                ypmipni=(y+1)%N
-                zpmipni=z
-        if mi==2:
-                #next site on mi
-                tpmi=t
-                xpmi=x
-                ypmi=y
-                zpmi=(z+1)%N
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=x
-                ypmipni=y
-                zpmipni=(z+1)%N
+        incmi[mi]=1 #increment in the mi direction
+        #next site on mi
+        xpmi=(x+incmi[0].copy())%N
+        ypmi=(y+incmi[1].copy())%N
+        zpmi=(z+incmi[2].copy())%N
+        tpmi=(t+incmi[3].copy())%N
         for ni in range(0,mi):
-            if ni!=mi :
-                #unpload of the poin on ni
-                if ni==3:
-                    #next site on ni
-                    tpni=(t+1)%N
-                    xpni=x
-                    ypni=y
-                    zpni=z
-                    #next site on ni and mi
-                    tpmipni=(tpmipni+1)%N
-                    xpmipni=xpmipni
-                    ypmipni=ypmipni
-                    zpmipni=zpmipni
-                if ni==0:
-                    #next site on ni
-                    tpni=t
-                    xpni=(x+1)%N
-                    ypni=y
-                    zpni=z
-                    #next site on ni and mi
-                    tpmipni=tpmipni
-                    xpmipni=(xpmipni+1)%N
-                    ypmipni=ypmipni
-                    zpmipni=zpmipni
-                if ni==1:
-                    #next site on ni
-                    tpni=t
-                    xpni=x
-                    ypni=(y+1)%N
-                    zpni=z
-                    #next site on ni and mi
-                    tpmipni=tpmipni
-                    xpmipni=xpmipni
-                    ypmipni=(ypmipni+1)%N
-                    zpmipni=zpmipni
-                if ni==2:
-                    #next site on ni
-                    tpni=t
-                    xpni=x
-                    ypni=y
-                    zpni=(z+1)%N
-                    #next site on ni and mi
-                    tpmipni=tpmipni
-                    xpmipni=xpmipni
-                    ypmipni=ypmipni
-                    zpmipni=(zpmipni+1)%N
-                WL=WL+trace(rXc(U[x,y,z,t,mi].copy(),rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpni,ypni,zpni,tpni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))))
+            incni[ni]=1 #increment in the ni direction
+            #next site on ni
+            xpni=(x+incni[0].copy())%N
+            ypni=(y+incni[1].copy())%N
+            zpni=(z+incni[2].copy())%N
+            tpni=(t+incni[3].copy())%N
+            incni[ni]=0
 
+            WL=WL+trace(rXc(U[x,y,z,t,mi].copy(),rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpni,ypni,zpni,tpni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))))
+        incmi[mi]=0
     return real(WL)/(3.*6.)
 
 #Function that compute the Wilson Loop ax2a for each point of the lattice using the link variables
@@ -766,124 +253,40 @@ def compute_WL(U,x,y,z,t):
 def compute_WLax2a(U,x,y,z,t):
     N=8
     WL = 0.
+    incmi=zeros((4),'int')
+    incni=zeros((4),'int')
     for mi in range(0,4):
-        #upload of the poin on mi
-        if mi==3:
-                #next site on mi
-                tpmi=(t+1)%N
-                xpmi=x
-                ypmi=y
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=(t+1)%N
-                xpmipni=x
-                ypmipni=y
-                zpmipni=z
-        if mi==0:
-                #next site on mi
-                tpmi=t
-                xpmi=(x+1)%N
-                ypmi=y
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=(x+1)%N
-                ypmipni=y
-                zpmipni=z
-        if mi==1:
-                #next site on mi
-                tpmi=t
-                xpmi=x
-                ypmi=(y+1)%N
-                zpmi=z
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=x
-                ypmipni=(y+1)%N
-                zpmipni=z
-        if mi==2:
-                #next site on mi
-                tpmi=t
-                xpmi=x
-                ypmi=y
-                zpmi=(z+1)%N
-                #next site on ni and mi
-                tpmipni=t
-                xpmipni=x
-                ypmipni=y
-                zpmipni=(z+1)%N
+        incmi[mi]=1 #increment in the mi direction
+        #next site on mi
+        xpmi=(x+incmi[0].copy())%N
+        ypmi=(y+incmi[1].copy())%N
+        zpmi=(z+incmi[2].copy())%N
+        tpmi=(t+incmi[3].copy())%N
         for ni in range(3,mi,-1):
             if ni!=mi :
-                #unpload of the poin on ni
-                if ni==3:
-                    #next site on ni
-                    tpni=(t+1)%N
-                    xpni=x
-                    ypni=y
-                    zpni=z
-                    #next site on ni and mi
-                    tpmipni=(tpmipni+1)%N
-                    xpmipni=xpmipni
-                    ypmipni=ypmipni
-                    zpmipni=zpmipni
-                    #next site on 2ni
-                    tp2ni=(t+2)%N
-                    xp2ni=x
-                    yp2ni=y
-                    zp2ni=z
-                if ni==0:
-                    #next site on ni
-                    tpni=t
-                    xpni=(x+1)%N
-                    ypni=y
-                    zpni=z
-                    #next site on ni and mi
-                    tpmipni=tpmipni
-                    xpmipni=(xpmipni+1)%N
-                    ypmipni=ypmipni
-                    zpmipni=zpmipni
-                    #next site on 2ni
-                    tp2ni=t
-                    xp2ni=(x+2)%N
-                    yp2ni=y
-                    zp2ni=z
-                if ni==1:
-                    #next site on ni
-                    tpni=t
-                    xpni=x
-                    ypni=(y+1)%N
-                    zpni=z
-                    #next site on ni and mi
-                    tpmipni=tpmipni
-                    xpmipni=xpmipni
-                    ypmipni=(ypmipni+1)%N
-                    zpmipni=zpmipni
-                    #next site on 2ni
-                    tp2ni=t
-                    xp2ni=x
-                    yp2ni=(y+2)%N
-                    zp2ni=z
-                if ni==2:
-                    #next site on ni
-                    tpni=t
-                    xpni=x
-                    ypni=y
-                    zpni=(z+1)%N
-                    #next site on ni and mi
-                    tpmipni=tpmipni
-                    xpmipni=xpmipni
-                    ypmipni=ypmipni
-                    zpmipni=(zpmipni+1)%N
-                    #next site on 2ni
-                    tp2ni=t
-                    xp2ni=x
-                    yp2ni=y
-                    zp2ni=(z+2)%N
+                incni[ni]=1 #increment in the ni direction
+                #next site on ni
+                xpni=(x+incni[0].copy())%N
+                ypni=(y+incni[1].copy())%N
+                zpni=(z+incni[2].copy())%N
+                tpni=(t+incni[3].copy())%N
+                #next site on ni and mi
+                xpmipni=(x+incmi[0].copy()+incni[0].copy())%N
+                ypmipni=(y+incmi[1].copy()+incni[1].copy())%N
+                zpmipni=(z+incmi[2].copy()+incni[2].copy())%N
+                tpmipni=(t+incmi[3].copy()+incni[3].copy())%N
+                #next site on 2ni
+                xp2ni=(x+2*incni[0].copy())%N
+                yp2ni=(y+2*incni[1].copy())%N
+                zp2ni=(z+2*incni[2].copy())%N
+                tp2ni=(t+2*incni[3].copy())%N
+                incni[ni]=0
                 WL=WL+trace(rXc(U[x,y,z,t,mi].copy(),\
                         rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),U[xpmipni,ypmipni,zpmipni,tpmipni,ni].copy()),   \
                         rXc(dagger(U[xp2ni,yp2ni,zp2ni,tp2ni,mi].copy()), \
                         rXc(dagger(U[xpni,ypni,zpni,tpni,ni].copy()),dagger(U[x,y,z,t,ni].copy()))))))
 
+        incmi[mi]=0
     return real(WL)/(3.*6.)
 
 
