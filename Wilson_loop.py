@@ -5,32 +5,13 @@ import cmath
 import random
 from numpy import *
 
-#Function that compute the trace of a matrix
-def trace(M):
-    N=len(M)
-    trace=0.
-    for i in range(0,N):
-        trace=trace+M[i,i]
-    return trace
-
 #Function that compute the dagger of a matrix
 def dagger(M):
     N=len(M)
     H=zeros((N,N),dtype=complex)
-    for i in range(0,N):
-        for j in range(0,N):
-            H[i,j]=conjugate(M[j,i].copy())
+    R=matrix(M)
+    H=R.getH()
     return H.copy()
-
-#Function that compute the product of two square matrix with equal dimension
-def rXc(M,H):
-    N=len(M)
-    R=zeros((N,N),dtype=complex)
-    for j in range(0,N):
-        for i in range(0,N):
-            for n in range(0,N):
-                R[i,j]=R[i,j]+M[i,n].copy()*H[n,j].copy()
-    return R.copy()
 
 #Function that generate Nmatrix casual matrix belonging to the SU(3) group
 def randommatrixSU3(M):
@@ -72,13 +53,13 @@ def update(U,M):
                         if improved: #condition to use the improved action
                             gamma_imp=Gamma_improved(U,mi,x,y,z,t) #compute Gamma improved if it is asked
                         for p in range(10): #iteration before changing site of the lattice
-                            s=random.randint(2,2*Nmatrix) #Choose a random matrix            
+                            s=random.randint(2,2*Nmatrix) #Choose a random matrix
                             if improved: #condition to use the improved action
-                                dS = -beta_imp/(3)*(5/(3*u0**4)*real(trace(rXc((rXc(M[s],U[x,y,z,t,mi])-U[x,y,z,t,mi]),gamma)))-1/(12*u0**6)*real(trace(rXc((rXc(M[s],U[x,y,z,t,mi])-U[x,y,z,t,mi]),gamma_imp)))) # change in the improved action
+                                dS = -beta_imp/(3)*(5/(3*u0**4)*real(trace(dot((dot(M[s],U[x,y,z,t,mi])-U[x,y,z,t,mi]),gamma)))-1/(12*u0**6)*real(trace(dot((dot(M[s],U[x,y,z,t,mi])-U[x,y,z,t,mi]),gamma_imp)))) # change in the improved action
                             else:
-                                dS = -beta/(3)*real(trace(rXc((rXc(M[s].copy(),U[x,y,z,t,mi].copy())-U[x,y,z,t,mi].copy()),gamma.copy()))) # change in action
+                                dS = -beta/(3)*real(trace(dot((dot(M[s].copy(),U[x,y,z,t,mi].copy())-U[x,y,z,t,mi].copy()),gamma.copy()))) # change in action
                             if dS<0 or exp(-dS)>random.uniform(0,1):
-                                U[x,y,z,t,mi] = rXc(M[s].copy(),U[x,y,z,t,mi].copy())  # update U
+                                U[x,y,z,t,mi] = dot(M[s].copy(),U[x,y,z,t,mi].copy())  # update U
 
 
 #Function that compute gamma for QCD using the Wilson action
@@ -120,8 +101,8 @@ def Gamma(U,mi,x,y,z,t):
             zpmimni=(z+incmi[2].copy()-incni[2].copy())%N
             tpmimni=(t+incmi[3].copy()-incni[3].copy())%N
             incni[ni]=0
-            gamma=gamma+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpni,ypni,zpni,tpni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))
-            gamma=gamma+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni].copy()),dagger(U[xmni,ymni,zmni,tmni,mi].copy())),U[xmni,ymni,zmni,tmni,ni].copy())
+            gamma=gamma+dot(dot(U[xpmi,ypmi,zpmi,tpmi,ni],dagger(U[xpni,ypni,zpni,tpni,mi])),dagger(U[x,y,z,t,ni])) \
+                        +dot(dot(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni]),dagger(U[xmni,ymni,zmni,tmni,mi])),U[xmni,ymni,zmni,tmni,ni])
 
     return gamma.copy()
 
@@ -207,12 +188,12 @@ def Gamma_improved(U,mi,x,y,z,t):
             tmmipni=(t-incmi[3].copy()+incni[3].copy())%N
             incni[ni]=0
 
-            gamma_imp=gamma_imp+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,mi],U[xp2mi,yp2mi,zp2mi,tp2mi,ni]),rXc(dagger(U[xpmipni,ypmipni,zpmipni,tpmipni,mi]),rXc(dagger(U[xpni,ypni,zpni,tpni,mi]),dagger(U[x,y,z,t,ni]))))
-            gamma_imp=gamma_imp+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,mi],dagger(U[xp2mimni,yp2mimni,zp2mimni,tp2mimni,ni])),rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,mi]),rXc(dagger(U[xmni,ymni,zmni,tmni,mi]),U[xmni,ymni,zmni,tmni,ni])))
-            gamma_imp=gamma_imp+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni],U[xpmipni,ypmipni,zpmipni,tpmipni,ni]),rXc(dagger(U[xp2ni,yp2ni,zp2ni,tp2ni,mi]),rXc(dagger(U[xpni,ypni,zpni,tpni,ni]),dagger(U[x,y,z,t,ni]))))
-            gamma_imp=gamma_imp+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni]),dagger(U[xpmim2ni,ypmim2ni,zpmim2ni,tpmim2ni,ni])),rXc(dagger(U[xm2ni,ym2ni,zm2ni,tm2ni,mi]),rXc(U[xm2ni,ym2ni,zm2ni,tm2ni,ni],U[xmni,ymni,zmni,tmni,ni])))
-            gamma_imp=gamma_imp+rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni],dagger(U[xpni,ypni,zpni,tpni,mi])),rXc(dagger(U[xmmipni,ymmipni,zmmipni,tmmipni,mi]),rXc(dagger(U[xmmi,ymmi,zmmi,tmmi,ni]),U[xmmi,ymmi,zmmi,tmmi,mi])))
-            gamma_imp=gamma_imp+rXc(rXc(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni]),dagger(U[xmni,ymni,zmni,tmni,mi])),rXc(dagger(U[xmmimni,ymmimni,zmmimni,tmmimni,mi]),rXc(U[xmmimni,ymmimni,zmmimni,tmmimni,ni],U[xmmi,ymmi,zmmi,tmmi,mi])))
+            gamma_imp=gamma_imp+dot(dot(U[xpmi,ypmi,zpmi,tpmi,mi],U[xp2mi,yp2mi,zp2mi,tp2mi,ni]),dot(dagger(U[xpmipni,ypmipni,zpmipni,tpmipni,mi]),dot(dagger(U[xpni,ypni,zpni,tpni,mi]),dagger(U[x,y,z,t,ni])))) \
+                                +dot(dot(U[xpmi,ypmi,zpmi,tpmi,mi],dagger(U[xp2mimni,yp2mimni,zp2mimni,tp2mimni,ni])),dot(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,mi]),dot(dagger(U[xmni,ymni,zmni,tmni,mi]),U[xmni,ymni,zmni,tmni,ni]))) \
+                                +dot(dot(U[xpmi,ypmi,zpmi,tpmi,ni],U[xpmipni,ypmipni,zpmipni,tpmipni,ni]),dot(dagger(U[xp2ni,yp2ni,zp2ni,tp2ni,mi]),dot(dagger(U[xpni,ypni,zpni,tpni,ni]),dagger(U[x,y,z,t,ni])))) \
+                                +dot(dot(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni]),dagger(U[xpmim2ni,ypmim2ni,zpmim2ni,tpmim2ni,ni])),dot(dagger(U[xm2ni,ym2ni,zm2ni,tm2ni,mi]),dot(U[xm2ni,ym2ni,zm2ni,tm2ni,ni],U[xmni,ymni,zmni,tmni,ni]))) \
+                                +dot(dot(U[xpmi,ypmi,zpmi,tpmi,ni],dagger(U[xpni,ypni,zpni,tpni,mi])),dot(dagger(U[xmmipni,ymmipni,zmmipni,tmmipni,mi]),dot(dagger(U[xmmi,ymmi,zmmi,tmmi,ni]),U[xmmi,ymmi,zmmi,tmmi,mi]))) \
+                                +dot(dot(dagger(U[xpmimni,ypmimni,zpmimni,tpmimni,ni]),dagger(U[xmni,ymni,zmni,tmni,mi])),dot(dagger(U[xmmimni,ymmimni,zmmimni,tmmimni,mi]),dot(U[xmmimni,ymmimni,zmmimni,tmmimni,ni],U[xmmi,ymmi,zmmi,tmmi,mi])))
     return gamma_imp.copy()
 
 #Function that compute the Wilson axa Loop for each point of the lattice using the link variables
@@ -241,7 +222,7 @@ def compute_WL(U,x,y,z,t):
             tpni=(t+incni[3].copy())%N
             incni[ni]=0
 
-            WL=WL+trace(rXc(U[x,y,z,t,mi].copy(),rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),dagger(U[xpni,ypni,zpni,tpni,mi].copy())),dagger(U[x,y,z,t,ni].copy()))))
+            WL=WL+trace(dot(U[x,y,z,t,mi],dot(dot(U[xpmi,ypmi,zpmi,tpmi,ni],dagger(U[xpni,ypni,zpni,tpni,mi])),dagger(U[x,y,z,t,ni]))))
         incmi[mi]=0
     return real(WL)/(3.*6.)
 
@@ -281,10 +262,10 @@ def compute_WLax2a(U,x,y,z,t):
                 zp2ni=(z+2*incni[2].copy())%N
                 tp2ni=(t+2*incni[3].copy())%N
                 incni[ni]=0
-                WL=WL+trace(rXc(U[x,y,z,t,mi].copy(),\
-                        rXc(rXc(U[xpmi,ypmi,zpmi,tpmi,ni].copy(),U[xpmipni,ypmipni,zpmipni,tpmipni,ni].copy()),   \
-                        rXc(dagger(U[xp2ni,yp2ni,zp2ni,tp2ni,mi].copy()), \
-                        rXc(dagger(U[xpni,ypni,zpni,tpni,ni].copy()),dagger(U[x,y,z,t,ni].copy()))))))
+                WL=WL+trace(dot(U[x,y,z,t,mi],\
+                        dot(dot(U[xpmi,ypmi,zpmi,tpmi,ni],U[xpmipni,ypmipni,zpmipni,tpmipni,ni]),   \
+                        dot(dagger(U[xp2ni,yp2ni,zp2ni,tp2ni,mi]), \
+                        dot(dagger(U[xpni,ypni,zpni,tpni,ni]),dagger(U[x,y,z,t,ni]))))))
 
         incmi[mi]=0
     return real(WL)/(3.*6.)
