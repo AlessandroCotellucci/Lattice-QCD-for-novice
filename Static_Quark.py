@@ -212,13 +212,13 @@ def ProductU(U,x,y,z,t,n,f):
     productU=I.copy()  #inizializing ProductU
     for i in range(n):
         if f==3: #time case
-            productU=dot(productU,U[x,y,z,(t+i)%N,3].copy())
+            productU=dot(productU,U[x,y,z,(t+i)%N,3])
         if f==0: #space 1 case
-            productU=dot(productU,U[(x+i)%N,y,z,t,0].copy())
+            productU=dot(productU,U[(x+i)%N,y,z,t,0])
         if f==1: #space 2 case
-            productU=dot(productU,U[x,(y+i)%N,z,t,1].copy())
+            productU=dot(productU,U[x,(y+i)%N,z,t,1])
         if f==2: #space 3 case
-            productU=dot(productU,U[x,y,(z+i)%N,t,2].copy())
+            productU=dot(productU,U[x,y,(z+i)%N,t,2])
 
     return productU.copy()
 
@@ -234,13 +234,13 @@ def ProductUdagger(U,x,y,z,t,n,f):
     productUdagger=I.copy() #inizializing ProductUdagger
     for i in range(n):
         if f==3: #time case
-            productUdagger=dot(productUdagger,dagger(U[x,y,z,(t-i-1)%N,3].copy()))
+            productUdagger=dot(productUdagger,dagger(U[x,y,z,(t-i-1)%N,3]))
         if f==0: #space 1 case
-            productUdagger=dot(productUdagger,dagger(U[(x-i-1)%N,y,z,t,0].copy()))
+            productUdagger=dot(productUdagger,dagger(U[(x-i-1)%N,y,z,t,0]))
         if f==1: #space 2 case
-            productUdagger=dot(productUdagger,dagger(U[x,(y-i-1)%N,z,t,1].copy()))
+            productUdagger=dot(productUdagger,dagger(U[x,(y-i-1)%N,z,t,1]))
         if f==2: #space 3 case
-            productUdagger=dot(productUdagger,dagger(U[x,y,(z-i-1)%N,t,2].copy()))
+            productUdagger=dot(productUdagger,dagger(U[x,y,(z-i-1)%N,t,2]))
 
     return productUdagger.copy()
 
@@ -258,15 +258,15 @@ def compute_WL(U,time,radius):
     WL=0.
     for y in range(N):
         for z in range(N):
-            for t in range(N-time):
-                for x in range(N-radius):
+            for t in range(N):
+                for x in range(N):
                     productUt=ProductU(U,x,y,z,t,time,3)
                     productUr=ProductU(U,x,y,z,(t+time)%N,radius,0)
                     productUtdagger=ProductUdagger(U,(x+radius)%N,y,z,(t+time)%N,time,3)
                     productUrdagger=ProductUdagger(U,(x+radius)%N,y,z,t,radius,0)
-                    WL=WL+real(trace(dot(dot(productUt.copy(),productUr.copy()),dot(productUtdagger.copy(),productUrdagger.copy()))))
+                    WL=WL+real(trace(dot(dot(productUt,productUr),dot(productUtdagger,productUrdagger))))
 
-    return WL/3./N**2/(N-radius)/(N-time)
+    return WL/3./N**4
 
 
 
@@ -274,18 +274,19 @@ def compute_WL(U,time,radius):
 #allocation of the arrays and definition of the parameters
 a=0.25
 N=8
+N_sim=5
 Nmatrix=200
-N_cf=10
+N_cf=20
 N_cor=50
 U=zeros((N,N,N,N,4,3,3),dtype=complex) #inizializing U
-WL=ones((N_cf,N,N), 'double') #inizializing WL
+WL=ones((N_cf,N_sim,N_sim), 'double') #inizializing WL
 M=zeros((Nmatrix,3,3),dtype=complex) #inizializing the random matrix
-avg_WL=zeros((N,N),'double') #inizializing avg_WL
-avg_WLSQ=zeros((N,N),'double') #inizializing avg_WLSQ
-err_avg_WL=zeros((N,N),'double') #inizializing err_avg_WL
-potential=zeros(N-1) #inizializing the potential
-err_potential=zeros(N-1) #inizializing the err_potential
-rad=zeros(N-1) #inizializing the radius
+avg_WL=zeros((N_sim,N_sim),'double') #inizializing avg_WL
+avg_WLSQ=zeros((N_sim,N_sim),'double') #inizializing avg_WLSQ
+err_avg_WL=zeros((N_sim,N_sim),'double') #inizializing err_avg_WL
+potential=zeros(N_sim-1) #inizializing the potential
+err_potential=zeros(N_sim-1) #inizializing the err_potential
+rad=zeros(N_sim-1) #inizializing the radius
 # inizializing U with the identity which belongs to the SU(3) group
 for x in range(0,N):
     for y in range(0,N):
@@ -305,30 +306,30 @@ for alpha in range(0,N_cf): # loop on random paths
     for j in range(0,N_cor):
         update(U,M)
     WL[alpha]=0.
-    for time in range(1,N):
-        for radius in range(1,N):
+    for time in range(1,N_sim):
+        for radius in range(1,N_sim):
             WL[alpha,time,radius]=compute_WL(U,time,radius)
     print("End simulation number:",alpha+1)
-for time in range(1,N): #computation of the Wilson loop mean value for every possible values of time and radius
-    for radius in range(1,N):
+for time in range(1,N_sim): #computation of the Wilson loop mean value for every possible values of time and radius
+    for radius in range(1,N_sim):
         avg_WL[time,radius]=0.
         avg_WLSQ[time,radius]=0.
         for alpha in range(0,N_cf): # compute MC averages
-            avg_WL[time,radius]= avg_WL[time,radius]+WL[alpha,time,radius].copy()
-            avg_WLSQ[time,radius]=avg_WLSQ[time,radius]+WL[alpha,time,radius].copy()**2
+            avg_WL[time,radius]= avg_WL[time,radius]+WL[alpha,time,radius]
+            avg_WLSQ[time,radius]=avg_WLSQ[time,radius]+WL[alpha,time,radius]**2
         avg_WL[time,radius] = avg_WL[time,radius]/N_cf  #mean value on every configuration
         avg_WLSQ[time,radius] = avg_WLSQ[time,radius]/N_cf
-        err_avg_WL[time,radius]=(abs(avg_WLSQ[time,radius]-avg_WL[time,radius]**2)/N_cf)**(1/2) #statistical error
+        err_avg_WL[time,radius]=((avg_WLSQ[time,radius]-avg_WL[time,radius]**2)/N_cf)**(1/2) #statistical error
 
-for i in range(0,N-1): #high time limit
+for i in range(0,N_sim-1): #high time limit
     radius=i+1
-    potential[i]=avg_WL[N-2,radius]/avg_WL[N-1,radius] #computation of the potential
-    err_potential[i]=((err_avg_WL[N-2,radius]/avg_WL[N-2,radius])**2+(err_avg_WL[N-1,radius]/avg_WL[N-1,radius])**2)**(1/2)*potential[i] #propagation of the error on the potential
+    potential[i]=avg_WL[N_sim-2,radius]/avg_WL[N_sim-1,radius] #computation of the potential
+    err_potential[i]=((err_avg_WL[N_sim-2,radius]/avg_WL[N_sim-2,radius])**2+(err_avg_WL[N_sim-1,radius]/avg_WL[N_sim-1,radius])**2)**(1/2)*potential[i] #propagation of the error on the potential
     rad[i]=radius
-print(potential,err_potential)
+
+
 #plot of the numerical solution
 plt.errorbar(rad, potential, yerr=err_potential, fmt='.', color='black', label='Numerical');
-#plt.axis([0,5,0,3])
 plt.legend(loc='upper right')
 plt.title('Static quark potential')
 plt.xlabel('$r/a$')
