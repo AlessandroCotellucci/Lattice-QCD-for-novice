@@ -310,6 +310,7 @@ for alpha in range(0,N_cf): # loop on random paths
         for radius in range(1,N_sim):
             WL[alpha,time,radius]=compute_WL(U,time,radius)
     print("End simulation number:",alpha+1)
+    print(WL[alpha])
 for time in range(1,N_sim): #computation of the Wilson loop mean value for every possible values of time and radius
     for radius in range(1,N_sim):
         avg_WL[time,radius]=0.
@@ -320,14 +321,14 @@ for time in range(1,N_sim): #computation of the Wilson loop mean value for every
         avg_WL[time,radius] = avg_WL[time,radius]/N_cf  #mean value on every configuration
         avg_WLSQ[time,radius] = avg_WLSQ[time,radius]/N_cf
         err_avg_WL[time,radius]=((avg_WLSQ[time,radius]-avg_WL[time,radius]**2)/N_cf)**(1/2) #statistical error
-
+print(avg_WL,err_avg_WL)
 for i in range(0,N_sim-1): #high time limit
     radius=i+1
     potential[i]=avg_WL[N_sim-2,radius]/avg_WL[N_sim-1,radius] #computation of the potential
     err_potential[i]=((err_avg_WL[N_sim-2,radius]/avg_WL[N_sim-2,radius])**2+(err_avg_WL[N_sim-1,radius]/avg_WL[N_sim-1,radius])**2)**(1/2)*potential[i] #propagation of the error on the potential
     rad[i]=radius
 
-
+print(potential, err_potential)
 #plot of the numerical solution
 plt.errorbar(rad, potential, yerr=err_potential, fmt='.', color='black', label='Numerical');
 plt.legend(loc='upper right')
