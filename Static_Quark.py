@@ -208,7 +208,7 @@ def Gamma_improved(U,mi,x,y,z,t):
 def ProductU(U,x,y,z,t,n,f):
     N=8
     I=eye(3)
-    productU=zeros((N,N,N,N,4,3,3),dtype=complex) #allocation of productU
+    productU=zeros((3,3),dtype=complex) #allocation of productU
     productU=I.copy()  #inizializing ProductU
     for i in range(n):
         if f==3: #time case
@@ -230,7 +230,7 @@ def ProductU(U,x,y,z,t,n,f):
 def ProductUdagger(U,x,y,z,t,n,f):
     N=8
     I=eye(3)
-    productUdagger=zeros((N,N,N,N,4,3,3),dtype=complex) #allocation of productUdagger
+    productUdagger=zeros((3,3),dtype=complex) #allocation of productUdagger
     productUdagger=I.copy() #inizializing ProductUdagger
     for i in range(n):
         if f==3: #time case
