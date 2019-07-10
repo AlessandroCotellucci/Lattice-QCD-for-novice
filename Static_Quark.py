@@ -210,16 +210,14 @@ def ProductU(U,x,y,z,t,n,f):
     I=eye(3)
     productU=zeros((3,3),dtype=complex) #allocation of productU
     productU=I.copy()  #inizializing ProductU
+    inc=zeros((4),'int')
+    inc[f]=1
     for i in range(n):
-        if f==3: #time case
-            productU=dot(productU,U[x,y,z,(t+i)%N,3])
-        if f==0: #space 1 case
-            productU=dot(productU,U[(x+i)%N,y,z,t,0])
-        if f==1: #space 2 case
-            productU=dot(productU,U[x,(y+i)%N,z,t,1])
-        if f==2: #space 3 case
-            productU=dot(productU,U[x,y,(z+i)%N,t,2])
-
+        x_inc=(x+i*inc[0])%N #increment in the Wilson line direction
+        y_inc=(y+i*inc[1])%N #increment in the Wilson line direction
+        z_inc=(z+i*inc[2])%N #increment in the Wilson line direction
+        t_inc=(t+i*inc[3])%N #increment in the Wilson line direction
+        productU=dot(productU,U[x_inc,y_inc,z_inc,t_inc,f])
     return productU.copy()
 
 #Function that compute the inverse side of a Wilson loop
@@ -232,16 +230,14 @@ def ProductUdagger(U,x,y,z,t,n,f):
     I=eye(3)
     productUdagger=zeros((3,3),dtype=complex) #allocation of productUdagger
     productUdagger=I.copy() #inizializing ProductUdagger
+    inc=zeros((4),'int')
+    inc[f]=1
     for i in range(n):
-        if f==3: #time case
-            productUdagger=dot(productUdagger,dagger(U[x,y,z,(t-i-1)%N,3]))
-        if f==0: #space 1 case
-            productUdagger=dot(productUdagger,dagger(U[(x-i-1)%N,y,z,t,0]))
-        if f==1: #space 2 case
-            productUdagger=dot(productUdagger,dagger(U[x,(y-i-1)%N,z,t,1]))
-        if f==2: #space 3 case
-            productUdagger=dot(productUdagger,dagger(U[x,y,(z-i-1)%N,t,2]))
-
+        x_inc=(x-(i+1)*inc[0])%N #decrement in the Wilson line direction
+        y_inc=(y-(i+1)*inc[1])%N #decrement in the Wilson line direction
+        z_inc=(z-(i+1)*inc[2])%N #decrement in the Wilson line direction
+        t_inc=(t-(i+1)*inc[3])%N #decrement in the Wilson line direction
+        productUdagger=dot(productUdagger,dagger(U[x_inc,y_inc,z_inc,t_inc,f]))
     return productUdagger.copy()
 
 #Function that compute the Wilson Loop time*axradius*a mean value on the lattice using the link variables
