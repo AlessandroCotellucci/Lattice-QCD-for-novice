@@ -14,6 +14,10 @@ def dagger(M):
     return H.copy()
 
 #Function that generate Nmatrix casual matrix belonging to the SU(3) group
+#input:-M:Matrix array
+#output:-M:Matrix array with random SU(3) matrices
+#innner parameters: -Nmatrix: number of matrices that we want generate
+#                   -eps: small parameter for the Taylor serie
 def randommatrixSU3(M):
     identity=eye(3)
     Nmatrix=100
@@ -33,9 +37,11 @@ def randommatrixSU3(M):
         M[s+Nmatrix]=dagger(M[s]) #Saving the inverse
     return M.copy()
 
+
 #Function that upload the position using a metropolis algoritm considering the decrising
 #in the action using the Wilson action for QCD
 #input:-U:array of the link variable
+#      -M:Random matrix belonging to the group SU(3)
 #inner parameters: -N:total number of points in the lattice
 def update(U,M):
     Nmatrix=100
@@ -65,6 +71,7 @@ def update(U,M):
 #Function that compute gamma for QCD using the Wilson action
 #input:-x,y,z,t: position in which gamma is computed
 #      -U:array of link variables
+#      -ro:direction in which Gamma is computed
 #inner parameter:-N:total number of points in the lattice
 def Gamma(U,ro,x,y,z,t):
     N=8
@@ -272,16 +279,16 @@ def compute_WLax2a(U,x,y,z,t):
 
 
 
-
+#main function
 #allocation of the arrays and definition of the parameters
-a=0.25
-N=8
-Nmatrix=200
-N_cf=10
-N_cor=50
-U=zeros((N,N,N,N,4,3,3),dtype=complex) # inizializing U
-WL=ones((N_cf), 'double')
-WLax2=ones((N_cf), 'double')
+a=0.25 #spacing of the lattice
+N=8 #number of points in the lattice
+Nmatrix=200 #number of SU(3) random matrices
+N_cf=10 #number of Montecarlo configurations
+N_cor=50 #number of update before computing the Wilson loop's
+U=zeros((N,N,N,N,4,3,3),dtype=complex) # inizializing U: link variables
+WL=ones((N_cf), 'double') #inizializing WL: Wilson loop axa
+WLax2=ones((N_cf), 'double') #inizializing WLax2: Wilson loop ax2a
 M=zeros((Nmatrix,3,3),dtype=complex) #inizializing the random matrix
 # inizializing U with the identity which belongs to the SU(3) group
 for x in range(0,N):
