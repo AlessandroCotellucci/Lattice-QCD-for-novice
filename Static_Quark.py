@@ -432,7 +432,7 @@ for time in range(1,N_sim_t): #computation of the Wilson loop mean value for eve
 
 for i in range(0,N_sim_r-1): #computation of the fraction in the high time limit with the error
     radius=i+1
-    potential[i]=avg_WL[N_sim_t-2,radius]/avg_WL[N_sim_t-1,radius] #computation of the potential
+    potential[i]=abs(avg_WL[N_sim_t-2,radius]/avg_WL[N_sim_t-1,radius]) #computation of the potential
     err_potential[i]=((err_avg_WL[N_sim_t-1,radius]/avg_WL[N_sim_t-1,radius])**2+(err_avg_WL[N_sim_t-2,radius]/avg_WL[N_sim_t-2,radius])**2)**(1/2)*potential[i] #propagation of the error on the potential from the wilson loop estimation
     rad[i]=radius
 
