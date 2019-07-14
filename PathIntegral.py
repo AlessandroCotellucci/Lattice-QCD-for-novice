@@ -59,9 +59,6 @@ err=ones(10, 'double')
 #print the value of x, the result and the fraction between the numerical result
 #and the exact solution
 for s in range(10):
-    z.append(10)
-    result.append(10)
-    err.append(10)
     z[s]=s*2/9
     integ = vegas.Integrator(7*[[-5, 5]])
     integration = integ(partial(f,z[s]), nitn=10, neval=100000)
@@ -71,8 +68,6 @@ for s in range(10):
 
 #Computation for 100 values of x of the exact solution
 for s in range(100):
-    exa.append(100)
-    y.append(100)
     y[s]=s*2/100
     exa[s] = exact(y[s])
 
@@ -83,6 +78,6 @@ plt.errorbar(z, result, yerr=err,fmt='o', color='black', label='Numerical');
 plt.legend(loc='upper right')
 plt.axis([0,2.0,0.0,0.1])
 plt.xlabel('x')
-plt.ylabel('Propagator')
+plt.ylabel(r'$\langle x|e^{-Ht}|x\rangle$')
 plt.title('Harmonic oscillator')
 plt.show()
